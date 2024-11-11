@@ -74,7 +74,7 @@ if (!in_array($selected_user, array_column($users, 'username'))) {
                                 if (file_exists($image_path)) {
                                     echo "<img src='$image_path' alt='{$user_item['username']}' class='rounded-full w-8 h-8'>";
                                 } else {
-                                    echo "<img src='media/user_images/default.svg' alt='Default Image' class='rounded-full w-8 h-8'>";
+                                    echo "<img src='media/user_images/default.jpg' alt='Default Image' class='rounded-full w-8 h-8'>";
                                 }
                                 ?>
                                 <span class="text-lg font-medium"><?php echo htmlspecialchars($user_item['username']); ?></span>

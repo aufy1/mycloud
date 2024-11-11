@@ -23,7 +23,7 @@ mysqli_close($database);
 ?>
 
 <?php require_once 'head.php'; ?>
-<body>
+<body class="bg-gray-100">
 <?php require_once 'header.php'; ?>
 <main>
     <section class="sekcja1 py-10">

@@ -4,7 +4,7 @@ $imagePath = "media/user_images/{$_SESSION['username']}.jpg";
 
 // Jeśli plik obrazu użytkownika nie istnieje, ustaw domyślny obraz
 if (!file_exists($imagePath)) {
-    $imagePath = "media/user_images/default.svg"; // Ścieżka do domyślnego obrazu
+    $imagePath = "media/user_images/default.jpg"; // Ścieżka do domyślnego obrazu
 }
 ?>
 <header class="fixed top-0 left-0 w-full bg-white bg-opacity-60 backdrop-blur-sm border-b border-gray-200 z-50">
@@ -12,7 +12,7 @@ if (!file_exists($imagePath)) {
     <div class="flex flex-row items-center justify-between">
       <div class="flex items-center space-x-4">
         <a href="index.php" class="flex items-center font-medium text-gray-900">
-          <span class="text-xl font-black leading-none select-none">
+          <span class="text-xl font-black leading-none select-none" style="font-family: VT323, serif;">
             my<span class="text-indigo-600">Cloud</span>
           </span>
         </a>
@@ -37,7 +37,7 @@ if (!file_exists($imagePath)) {
     <svg id="user-arrow" class="w-4 h-4 transition-transform duration-300 mr-2 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
-    <img src="<?php echo $imagePath; ?>" alt="User" class="w-8 h-8 rounded-full border-2 border-gray-300">
+    <img src="<?php echo $imagePath; ?>" alt="User" class="w-8 h-8 rounded-full border border-gray-300">
   </div>
   
   <!-- Menu rozwijane -->
@@ -128,7 +128,7 @@ userIcon.addEventListener('click', () => {
       navbar.classList.add('bg-white', 'shadow-md');
       navbar.classList.remove('bg-transparent');
     } else {
-      navbar.classList.remove('bg-white', 'shadow-md');
+      navbar.classList.remove('shadow-md');
       navbar.classList.add('bg-transparent');
     }
   });

@@ -13,11 +13,10 @@ require_once 'config.php';
 <body>
 <?php require_once 'header.php'; ?>	
 
-<main>
-<section class="sekcja1 container mt-5 px-4">	
-    <div class="flex justify-center">
-        <div class="w-full md:w-2/3 lg:w-1/2">
-            <h2 class="text-center text-2xl font-semibold mb-5">Edytuj profil</h2>
+<main class="py-10">
+<section class="sekcja1">	
+    <div class="container mx-auto">
+            <h2 class="text-center text-2xl mb-5">Edytuj profil</h2>
             
             <?php 
             // Ścieżka do zdjęcia użytkownika
@@ -26,7 +25,7 @@ require_once 'config.php';
             
             // Sprawdź, czy plik istnieje, jeśli nie, użyj domyślnego obrazu
             if (!file_exists($profileImagePath)) {
-                $profileImagePath = "media/user_images/default.svg";
+                $profileImagePath = "media/user_images/default.jpg";
             }
             ?>
 
@@ -74,7 +73,6 @@ require_once 'config.php';
                     <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-md">Zapisz zmiany</button>
                 </div>
             </form>
-        </div>
     </div>
 </section>	
 </main>
