@@ -28,6 +28,13 @@ require_once 'functions.php';
   <form action="weryfikuj.php" method="post">
     <h1 class="text-2xl font-semibold text-gray-700 mb-4">Please sign in</h1>
 
+    <input type="hidden" name="screen_resolution" id="screen_resolution">
+    <input type="hidden" name="window_resolution" id="window_resolution">
+    <input type="hidden" name="color_depth" id="color_depth">
+    <input type="hidden" name="cookies_enabled" id="cookies_enabled">
+    <input type="hidden" name="browser_language" id="browser_language">
+    <input type="hidden" name="browser_name" id="browser_name">
+
     <div class="mb-4">
       <input type="text" name="user" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Username">
     </div>
@@ -41,6 +48,8 @@ require_once 'functions.php';
         <div class="g-recaptcha" data-sitekey="6LcLe54pAAAAAPpZGs4QcEpA-GZz7_rSk9MnzgXl"></div>
       </div>
     <?php endif; ?>
+    
+
     
     <input class="w-full py-2 mt-4 bg-blue-500 text-white font-semibold rounded-lg cursor-pointer hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500" type="submit" value="Sign in">
 
@@ -104,6 +113,7 @@ require_once 'functions.php';
 <?php endif; ?>
 
 <script type="text/javascript">
+
 document.addEventListener('DOMContentLoaded', function() {
     var formRegister = document.getElementById('formRegister');
     var formSignin = document.getElementById('formSignin');
@@ -118,6 +128,18 @@ document.addEventListener('DOMContentLoaded', function() {
         formSignin.style.display = 'block';
     };
 });
+
+
+
+document.querySelector("form").addEventListener("submit", function () {
+    document.getElementById("screen_resolution").value = `${screen.width}x${screen.height}`;
+    document.getElementById("window_resolution").value = `${window.innerWidth}x${window.innerHeight}`;
+    document.getElementById("color_depth").value = screen.colorDepth;
+    document.getElementById("cookies_enabled").value = navigator.cookieEnabled ? "1" : "0";
+    document.getElementById("browser_language").value = navigator.language || navigator.userLanguage;
+    document.getElementById("browser_name").value = navigator.userAgent;
+});
+
 </script>
 
 </body>

@@ -1,8 +1,14 @@
 <?php
+session_start();
 // Ustawiamy nagłówek odpowiedzi na JSON
 header('Content-Type: application/json');
 
 require_once('../../config.php');
+
+if (!isset($_SESSION['username'])) {
+    echo json_encode(['success' => false, 'error' => 'Użytkownik niezalogowany']);
+    exit();
+}
 
 // Sprawdzamy, czy połączenie się powiodło
 if (mysqli_connect_errno()) {

@@ -67,10 +67,10 @@ mysqli_close($database);
         <!-- Sprawdzamy, czy mamy parametr 'disk' w URL -->
         <?php if ($disk): ?>
             <!-- Wyświetlamy pliki z wybranego dysku w opcji kafelkowej -->
-            <div class="flex space-x-4 flex-wrap">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <?php if (!empty($files)): ?>
                     <?php foreach ($files as $file): ?>
-                        <div class="file-item bg-white shadow-md rounded-xl p-6 text-center relative">
+                        <div class="file-item bg-white shadow-md rounded-xl p-6 text-center relative min-h-[200px]">
                             <div class="absolute top-4 right-4 w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center cursor-pointer" id="menuButton">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 text-purple-400">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -94,45 +94,46 @@ mysqli_close($database);
 
         <?php else: ?>
             <!-- Wyświetlamy dyski, jeśli brak parametru 'disk' -->
-            <div class="flex space-x-4 flex-wrap">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <?php if (!empty($disks)): ?>
                     <?php foreach ($disks as $disk): ?>
-                        <div class="bg-white font-dmsans shadow-md rounded-xl p-8 max-w-sm w-full relative flex-1 mb-4">
-    <div class="absolute top-4 right-4 w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center cursor-pointer" id="menuButton_<?php echo $disk['disk_name']; ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 text-purple-400 transition-transform duration-300 ease-in-out">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-    </div>
+                        <div class="bg-white font-dmsans shadow-md rounded-xl p-8 min-h-[300px] w-full relative mb-4">
+                            <div class="absolute top-4 right-4 w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center cursor-pointer" id="menuButton_<?php echo $disk['disk_name']; ?>">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 text-purple-400 transition-transform duration-300 ease-in-out">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
 
-    <div id="dropdownMenu_<?php echo $disk['disk_name']; ?>" class="absolute top-16 right-0 bg-white shadow-lg rounded-lg w-40 p-2 hidden">
-        <ul class="space-y-2">
-            <li><a href="files.php?disk=<?php echo urlencode($disk['disk_name']); ?>" class="text-sm text-gray-700 hover:text-purple-500">Otwórz</a></li>
-            <li><a href="#" class="text-sm text-gray-700 hover:text-purple-500" onclick="deleteDisk('<?php echo $disk['disk_name']; ?>')">Usuń</a></li>
-            <li><a href="#" class="text-sm text-gray-700 hover:text-purple-500" onclick="shareDisk('<?php echo $disk['disk_name']; ?>')">Udostępnij</a></li>
-        </ul>
-    </div>
+                            <div id="dropdownMenu_<?php echo $disk['disk_name']; ?>" class="absolute top-16 right-0 bg-white shadow-lg rounded-lg w-40 p-2 hidden">
+                                <ul class="space-y-2">
+                                    <li><a href="files.php?disk=<?php echo urlencode($disk['disk_name']); ?>" class="text-sm text-gray-700 hover:text-purple-500">Otwórz</a></li>
+                                    <li><a href="#" class="text-sm text-gray-700 hover:text-purple-500" onclick="deleteDisk('<?php echo $disk['disk_name']; ?>')">Usuń</a></li>
 
-    <div class="flex justify-center mt-6 mb-12">
-        <img src="media/storage_icons/cloud_blank.svg" alt="Cloud" class="w-20 h-20">
-    </div>
+                                    <li><a href="#" class="text-sm text-gray-700 hover:text-purple-500" onclick="shareDisk('<?php echo $disk['disk_name']; ?>')">Udostępnij</a></li>
+                                </ul>
+                            </div>
 
-    <h2 class="text-2xl font-semibold text-center mt-4"><?php echo htmlspecialchars($disk['disk_name']); ?></h2>
-    <p class="text-center text-gray-500 mt-2 mb-2">Przechowuj pliki w chmurze</p>
+                            <div class="flex justify-center mt-6 mb-12">
+                                <img src="media/storage_icons/cloud_blank.svg" alt="Cloud" class="w-20 h-20">
+                            </div>
 
-    <div class="flex justify-between mb-1 mt-8">
-        <span class="text-xs text-gray-500">0GB</span>
-        <span class="text-xs text-gray-500">100GB</span>
-    </div>
+                            <h2 class="text-2xl font-semibold text-center mt-4"><?php echo htmlspecialchars($disk['disk_name']); ?></h2>
+                            <p class="text-center text-gray-500 mt-2 mb-2">Przechowuj pliki w chmurze</p>
 
-    <div class="w-full bg-gray-200 rounded-full h-4">
-        <div class="bg-purple-400 h-4 rounded-full" style="width: 95%;"></div>
-    </div>
-</div>
+                            <div class="flex justify-between mb-1 mt-8">
+                                <span class="text-xs text-gray-500">0GB</span>
+                                <span class="text-xs text-gray-500">100GB</span>
+                            </div>
+
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div class="bg-purple-400 h-4 rounded-full" style="width: 95%;"></div>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
 
                 <!-- Kafelek "Dodaj Dysk" -->
-                <div id="addDiskTile" class="bg-white font-dmsans shadow-md rounded-xl p-8 max-w-sm w-full relative flex-1 cursor-pointer mb-4">
+                <div id="addDiskTile" class="bg-white font-dmsans shadow-md rounded-xl p-8 min-h-[348px] w-full relative cursor-pointer mb-4">
                     <div class="flex justify-center items-center h-full">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 text-purple-400">
@@ -141,13 +142,13 @@ mysqli_close($database);
                         </div>
                     </div>
                 </div>
-
             </div>
         <?php endif; ?>
 
         </div>
     </section>
 </main>
+
 
 <?php require_once 'footer.php'; ?>
 
@@ -217,6 +218,7 @@ mysqli_close($database);
         success: function(response) {
             if (response.success) {
                 alert('Nowy dysk został utworzony! Folder: ' + response.folder);
+                location.reload();
             } else {
                 alert('Wystąpił błąd przy tworzeniu dysku: ' + (response.error || 'Nieznany błąd'));
             }
@@ -226,6 +228,29 @@ mysqli_close($database);
         }
     });
 }
+
+function deleteDisk(diskName) {
+    if (confirm('Czy na pewno chcesz usunąć dysk ' + diskName + '?')) {
+        $.ajax({
+            url: 'api/cloud/delete_storage.php', // Ścieżka do pliku PHP usuwającego dysk
+            method: 'POST',
+            data: { disk_name: diskName },
+            success: function(response) {
+                if (response.success) {
+                    alert('Dysk ' + diskName + ' został usunięty!');
+                    location.reload(); // Odświeżenie strony po usunięciu dysku
+                } else {
+                    alert('Wystąpił błąd podczas usuwania dysku: ' + (response.error || 'Nieznany błąd'));
+                }
+            },
+            error: function() {
+                alert('Wystąpił błąd w trakcie komunikacji z serwerem.');
+            }
+        });
+    }
+}
+
+
 
 // Dodajemy zdarzenie kliknięcia do kafelka "Dodaj Dysk"
 $('#addDiskTile').click(function() {

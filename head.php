@@ -15,18 +15,13 @@
   
 
 
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-
-   <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-
-   <link href="signin.css" rel="stylesheet">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <link href="output.css" rel="stylesheet">
     
-    <script type="text/javascript" src="script.js"></script>
 
 	<link href="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.css" rel="stylesheet">
     <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
