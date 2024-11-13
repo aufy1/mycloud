@@ -7,6 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
+$username = $_SESSION['username'];
 $disk = isset($_GET['disk']) ? $_GET['disk'] : '';
 
 // Sprawdzanie, czy dysk istnieje
@@ -17,22 +18,40 @@ if (empty($disk)) {
 
 // Połączenie z bazą danych
 require_once 'config.php';
+require_once 'functions.php';
 
-// Pobranie plików z bazy danych
+if (!hasAccessToDisk($database, $_SESSION['username'], $disk)) {
+    header('Location: storage.php'); // Przekierowanie na stronę storage.php
+    exit();
+}
+else
+{
+// Pobieramy zmienną path z adresu URL (GET)
+$path = isset($_GET['path']) ? $_GET['path'] : '';
+var_dump($_GET['path']);
+// Jeśli użytkownik ma dostęp, pobieramy pliki z wybranego dysku i ścieżki
+$query = "SELECT * FROM files WHERE disk = ? AND path LIKE ?";
+$stmt = $database->prepare($query);
 
-$query = "SELECT * FROM files WHERE disk = ?";
-$stmt = $database->prepare($query); // Używamy zmiennej $database do przygotowania zapytania
-$stmt->bind_param('s', $disk); // Bindujemy parametr dysku
-$stmt->execute(); // Wykonanie zapytania
-$result = $stmt->get_result(); // Pobieramy wynik zapytania
+// Formatowanie ścieżki dla SQL - dodajemy końcowy `/`, aby wyszukać dokładnie w tej ścieżce
+$path_query = $disk . '/' . trim($path, '/'); // np. "dysk1/folder1/%"
+var_dump($path_query);
+// Bindowanie parametrów
+$stmt->bind_param('ss', $disk, $path_query);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$files = []; // Tablica na przechowanie wyników
+// Tablica na przechowanie wyników
+$files = [];
 while ($row = $result->fetch_assoc()) {
-    $files[] = $row; // Dodajemy każdy wiersz do tablicy
+    $files[] = $row;
 }
 
+require_once 'head.php';
 
-require_once 'head.php'; 
+}
+
+require_once 'head.php';
 ?>
 
 
@@ -41,8 +60,25 @@ require_once 'head.php';
 
     <main class="py-10">
         <section class="sekcja1">
+
+
+
+      
             <div class="container mx-auto">
-                <!-- Przycisk przełączania widoku "Kafelki" i "Lista" -->
+
+            <?php echo $disk;?>
+
+            <div class="flex items-center justify-center w-full pt-10">
+    <form action="api/cloud/create_dir.php" method="GET" class="w-full max-w-sm">
+        <div class="flex items-center">
+            <input type="text" name="new_folder" id="new_folder" placeholder="Nowy folder" class="w-full p-2 border border-gray-300 rounded-l-md" required>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md">Utwórz katalog</button>
+        </div>
+        <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
+        <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>"> <!-- Ukryty input dla ścieżki -->
+    </form>
+</div>
+
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 bg-white">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50">

@@ -39,6 +39,36 @@ function ip_location($ip) {
     return $details;
 }
 
+function hasAccessToDisk($database, $username, $disk) {
+    // Zapytanie do bazy danych, aby pobrać nazwy dysków użytkownika lub te, które są z nim udostępnione
+    $query = "SELECT disk_name FROM disks WHERE (owner = ? OR FIND_IN_SET(?, shared_with))";
+    $stmt = mysqli_prepare($database, $query);
+
+    if (!$stmt) {
+        echo json_encode(['success' => false, 'error' => 'Błąd zapytania SQL: ' . mysqli_error($database)]);
+        exit();
+    }
+
+    // Przypisanie parametrów
+    mysqli_stmt_bind_param($stmt, "ss", $username, $username);
+
+    // Wykonanie zapytania
+    mysqli_stmt_execute($stmt);
+
+    // Pobranie wyników
+    mysqli_stmt_bind_result($stmt, $disk_name);
+    $available_disks = [];
+
+    while (mysqli_stmt_fetch($stmt)) {
+        $available_disks[] = $disk_name;
+    }
+
+    // Zamykamy zapytanie
+    mysqli_stmt_close($stmt);
+
+    // Sprawdzenie, czy żądany dysk znajduje się na liście dostępnych dysków
+    return in_array($disk, $available_disks);
+}
 
 
 

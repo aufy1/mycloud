@@ -94,10 +94,10 @@ if (!in_array($selected_user, array_column($users, 'username'))) {
         <input type="hidden" name="recipient" value="<?php echo htmlspecialchars($selected_user); ?>">
         <input type="text" id="messageInput" name="message" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Napisz wiadomość...">
         <input type="file" id="fileInput" name="image" accept="image/jpeg" class="hidden" onchange="handleFileSelect(event)">
-        <label for="fileInput" class="cursor-pointer p-2 bg-gray-200 hover:bg-gray-300 rounded-md">
+        <label for="fileInput" class="cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md">
             <img src="media/menu_icons/paperclip-solid.svg" alt="Załącz" class="h-6 w-6 text-gray-600">
         </label>
-        <button class="bg-indigo-600 text-white p-2 rounded-md">Wyślij</button>
+        <button class="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-md">Wyślij</button>
     </form>
 </div>
 

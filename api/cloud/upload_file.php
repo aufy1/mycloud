@@ -2,6 +2,20 @@
 session_start();
 require_once '../../config.php';
 
+if (!isset($_SESSION['username'])) {
+    echo json_encode(['success' => false, 'error' => 'Użytkownik niezalogowany']);
+    exit();
+}
+
+$disk = isset($_POST['disk']) ? $_POST['disk'] : ''; // Odbieramy zmienną disk z formularza
+
+require_once '../../functions.php';
+
+if (!hasAccessToDisk($database, $_SESSION['username'], $disk)) {
+    echo json_encode(['success' => false, 'error' => 'Brak dostępu do dysku']);
+    exit();
+}
+
 // Sprawdzamy, czy plik został przesłany
 if (isset($_FILES['file_upload']) && $_FILES['file_upload']['error'] == 0) {
     $file_name = $_FILES['file_upload']['name'];
@@ -9,7 +23,6 @@ if (isset($_FILES['file_upload']) && $_FILES['file_upload']['error'] == 0) {
     $file_size = $_FILES['file_upload']['size'];
     $file_type = pathinfo($file_name, PATHINFO_EXTENSION);
     $owner = $_SESSION['username']; // Przechowujemy nazwę użytkownika
-    $disk = isset($_POST['disk']) ? $_POST['disk'] : ''; // Odbieramy zmienną disk z formularza
 
     // Jeśli nie określono dysku, wyświetl błąd
     if (empty($disk)) {
@@ -34,12 +47,15 @@ if (isset($_FILES['file_upload']) && $_FILES['file_upload']['error'] == 0) {
 
     // Przesyłanie pliku na serwer
     if (move_uploaded_file($file_tmp, $upload_path)) {
+        // Tworzenie ścieżki do zapisania w bazie danych
+        $path = $disk . '/';
+
         // Zapisanie informacji o pliku w bazie danych
-        $query = "INSERT INTO files (file_name, disk, owner, file_type, last_modified) VALUES (?, ?, ?, ?, NOW())";
+        $query = "INSERT INTO files (file_name, disk, owner, file_type, path, last_modified) VALUES (?, ?, ?, ?, ?, NOW())";
         
         // Zmiana połączenia z $conn na $database
         $stmt = $database->prepare($query);  // Używamy $database do przygotowania zapytania
-        $stmt->bind_param('ssss', $file_name, $disk, $owner, $file_type); // Bindowanie parametrów
+        $stmt->bind_param('sssss', $file_name, $disk, $owner, $file_type, $path); // Bindowanie parametrów
         $stmt->execute(); // Wykonanie zapytania
 
         echo json_encode(["success" => true]);

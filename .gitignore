@@ -22,3 +22,7 @@ node_modules/
 *.sql
 *.sqlite
 *.sqlite3
+
+#media, uploads
+uploads/cloud
+media/chat_images

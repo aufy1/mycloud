@@ -10,13 +10,21 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$disk_name = $_POST['disk_name'];
+require_once '../../functions.php';
+
+$disk = $_POST['disk_name'];
 $owner = $_SESSION['username'];
 
-if (empty($disk_name)) {
+if (empty($disk)) {
     echo json_encode(['success' => false, 'error' => 'Brak nazwy dysku']);
     exit();
 }
+
+if (!hasAccessToDisk($database, $owner, $disk)) {
+    echo json_encode(['success' => false, 'error' => 'Brak dostępu do dysku']);
+    exit();
+}
+
 
 // Włącz wyświetlanie błędów dla diagnostyki
 error_reporting(E_ALL);
@@ -29,11 +37,11 @@ if (!$stmt) {
     echo json_encode(['success' => false, 'error' => 'Błąd przygotowania zapytania: ' . mysqli_error($database)]);
     exit();
 }
-mysqli_stmt_bind_param($stmt, "ss", $disk_name, $owner);
+mysqli_stmt_bind_param($stmt, "ss", $disk, $owner);
 mysqli_stmt_execute($stmt);
 
 if (mysqli_stmt_affected_rows($stmt) > 0) {
-    $folder_path = '../../uploads/cloud/' . $disk_name;
+    $folder_path = '../../uploads/cloud/' . $disk;
 
     function deleteFolder($folder_path) {
         if (is_dir($folder_path)) {
