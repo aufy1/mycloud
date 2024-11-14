@@ -25,41 +25,58 @@ if (!hasAccessToDisk($database, $owner, $disk)) {
     exit();
 }
 
-
 // Włącz wyświetlanie błędów dla diagnostyki
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Usuwanie dysku z bazy danych
-$query = "DELETE FROM disks WHERE disk_name = ? AND owner = ?";
+// Usuwanie plików związanych z dyskiem w bazie danych
+$query = "DELETE FROM files WHERE disk = ?";
 $stmt = mysqli_prepare($database, $query);
 if (!$stmt) {
-    echo json_encode(['success' => false, 'error' => 'Błąd przygotowania zapytania: ' . mysqli_error($database)]);
+    echo json_encode(['success' => false, 'error' => 'Błąd przygotowania zapytania do usuwania plików: ' . mysqli_error($database)]);
     exit();
 }
-mysqli_stmt_bind_param($stmt, "ss", $disk, $owner);
+
+mysqli_stmt_bind_param($stmt, "s", $disk);
 mysqli_stmt_execute($stmt);
 
 if (mysqli_stmt_affected_rows($stmt) > 0) {
-    $folder_path = '../../uploads/cloud/' . $disk;
-
-    function deleteFolder($folder_path) {
-        if (is_dir($folder_path)) {
-            $files = scandir($folder_path);
-            foreach ($files as $file) {
-                if ($file != "." && $file != "..") {
-                    $filePath = $folder_path . '/' . $file;
-                    is_dir($filePath) ? deleteFolder($filePath) : unlink($filePath);
-                }
-            }
-            rmdir($folder_path);
-        }
+    // Usuwanie dysku z bazy danych
+    $query = "DELETE FROM disks WHERE disk_name = ? AND owner = ?";
+    $stmt = mysqli_prepare($database, $query);
+    if (!$stmt) {
+        echo json_encode(['success' => false, 'error' => 'Błąd przygotowania zapytania: ' . mysqli_error($database)]);
+        exit();
     }
 
-    deleteFolder($folder_path);
-    echo json_encode(['success' => true]);
+    mysqli_stmt_bind_param($stmt, "ss", $disk, $owner);
+    mysqli_stmt_execute($stmt);
+
+    if (mysqli_stmt_affected_rows($stmt) > 0) {
+        $folder_path = '../../uploads/cloud/' . $disk;
+
+        // Funkcja do usuwania folderu i jego zawartości
+        function deleteFolder($folder_path) {
+            if (is_dir($folder_path)) {
+                $files = scandir($folder_path);
+                foreach ($files as $file) {
+                    if ($file != "." && $file != "..") {
+                        $filePath = $folder_path . '/' . $file;
+                        is_dir($filePath) ? deleteFolder($filePath) : unlink($filePath);
+                    }
+                }
+                rmdir($folder_path);
+            }
+        }
+
+        deleteFolder($folder_path); // Usuwanie folderu
+
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Nie udało się usunąć dysku z bazy danych lub brak dostępu']);
+    }
 } else {
-    echo json_encode(['success' => false, 'error' => 'Nie udało się usunąć dysku z bazy danych lub brak dostępu']);
+    echo json_encode(['success' => false, 'error' => 'Nie udało się usunąć plików z bazy danych']);
 }
 
 mysqli_stmt_close($stmt);

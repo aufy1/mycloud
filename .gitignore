@@ -26,3 +26,6 @@ node_modules/
 #media, uploads
 uploads/cloud
 media/chat_images
+
+#rendered
+output.css
