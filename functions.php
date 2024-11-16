@@ -106,10 +106,10 @@ function hasAccessToDisk($database, $username, $disk) {
                 $dbPath = $disk . '/';
             }
 
-            if (substr_count($path, '/') > 1) 
-            {
-                $dbPath = $disk . '/' . $path . '/' . $fileName;
-            }
+        //    if (substr_count($path, '/') > 1) 
+        //    {
+        //        $dbPath = $disk . '/' . $path . '/' . $fileName;
+        //   }
 
 
             echo $dbPath;

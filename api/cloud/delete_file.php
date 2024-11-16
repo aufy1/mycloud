@@ -37,16 +37,19 @@ if (file_exists($filePath)) {
     if (is_dir($filePath)) {
         deleteFolder($filePath); // Twoja funkcja do usuwania folderów
 
-        // Sprawdzamy, czy path zawiera "/". Jeśli tak, traktujemy go jako folder.
-        if  (substr_count($path, '/') > 1) {
-            $dbPath = $disk . '/';  // Jeśli path zawiera "/", traktujemy go jako folder
-        } else {
-            $dbPath = $disk . '/' . $path;  // Jeśli path nie zawiera "/", traktujemy to jako pojedynczy folder
-        }
+    
+
+            $dbPath = $disk . '/' . $path; 
+        
+
+  //      if($path && substr_count($path, '/') == 0) 
+  //      {
+   //         $dbPath = $disk . '/';
+   //     }
         
         
         // Usuwamy plik, uwzględniając także nazwę pliku w zapytaniu
-        $query = "DELETE FROM files WHERE disk = ? AND path LIKE CONCAT(?, '%') AND file_name = ?";
+        $query = "DELETE FROM files WHERE disk = ? AND path = ? AND file_name = ?";
         $stmt = mysqli_prepare($database, $query);
         if ($stmt) {
             // Używamy pełnej ścieżki folderu (dbPath) oraz samego fileName w zapytaniu
@@ -54,14 +57,17 @@ if (file_exists($filePath)) {
             mysqli_stmt_execute($stmt);
         }
 
-        if(!$path)
+        // Logowanie zapytania
+        error_log('Wykonane zapytanie: ' . $query . ' z wartościami disk = ' . $disk . ', dbPath = ' . $dbPath . ', file_name = ' . $fileName);
+        
+        $dbPath = $disk . '/' . $path . '/' . $fileName;
+
+        if(((substr_count($path, '/') == 0) && $path) || !$path)
         {
             $dbPath = $disk . '/' . $fileName;
         }
 
-        // Logowanie zapytania
-        error_log('Wykonane zapytanie: ' . $query . ' z wartościami disk = ' . $disk . ', dbPath = ' . $dbPath . ', file_name = ' . $fileName);
-        
+
         // Usuwamy wszystkie pliki i foldery, które mają ścieżki zaczynające się od dbPath/fileName
         $query2 = "DELETE FROM files WHERE disk = ? AND path LIKE CONCAT(?, '%')";
         $stmt2 = mysqli_prepare($database, $query2);
@@ -79,7 +85,7 @@ if (file_exists($filePath)) {
             'success' => true,
             'message' => 'Plik lub folder został usunięty: ' . $filePath,
             'query' => $query,  // Dodajemy zapytanie do odpowiedzi JSON
-            'query_values' => ['disk' => $disk, 'dbPath' => $dbPath, 'file_name' => $fileName],  // Dodajemy wartości parametrów
+            'query_values' => ['disk' => $disk, 'dbPath' => $dbPath, 'file_name' => $fileName, 'path' => $path],  // Dodajemy wartości parametrów
 
         ]);
         

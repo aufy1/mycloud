@@ -7,11 +7,6 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Włącz wyświetlanie błędów dla diagnostyki
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-
 $username = $_SESSION['username'];
 $disk = isset($_GET['disk']) ? $_GET['disk'] : '';
 
@@ -40,10 +35,10 @@ if (!hasAccessToDisk($database, $_SESSION['username'], $disk)) {
 // Pobieramy zmienną path z adresu URL (GET)
 $path = isset($_GET['path']) ? $_GET['path'] : '';
 
-
-
 // Jeśli użytkownik ma dostęp, pobieramy pliki z wybranego dysku i ścieżki
-$query = "SELECT * FROM files WHERE disk = ? AND path LIKE ?";
+$query = "SELECT * FROM files WHERE disk = ? AND path LIKE ? ORDER BY 
+            CASE WHEN file_type = 'folder' THEN 0 ELSE 1 END, last_modified DESC";
+
 $stmt = $database->prepare($query);
 
 // Sprawdzanie błędów w zapytaniu
@@ -85,20 +80,6 @@ require_once 'head.php';
 
     <main class="py-10">
         <section class="sekcja1">
-
-
-
-<?php
-
-
-if (checkPathExists($database, "$disk", "asd", $path))
-{
-    echo "Folder istnieje!";
-} else {
-    echo "Folder nie istnieje!";
-}
- ?>
-
             <div class="container mx-auto">
                 <div class="w-full shadow-md sm:rounded-lg text-gray-500 bg-gray-50 flex items-center justify-between mb-2 text-gray-700 uppercase bg-gray-50 p-2">
                     <span class="text-md text-gray-900">Dysk: <?php echo htmlspecialchars($disk); ?></span>
@@ -152,29 +133,37 @@ if (checkPathExists($database, "$disk", "asd", $path))
                         <label for="checkbox-all-search" class="sr-only">checkbox</label>
                     </div>
                 </th>
-                <th scope="col" class="px-6 py-3">Type</th>
-                <th scope="col" class="px-6 py-3">File Name</th>
-                <th scope="col" class="px-6 py-3">Owner</th>
-                <th scope="col" class="px-6 py-3">Last Modified</th>
-                <th scope="col" class="px-6 py-3">File Type</th>
-                <th scope="col" class="px-6 py-3">Action</th>
+                            <th scope="col" class="px-6 py-3">ICON</th>
+                            <th scope="col" class="px-6 py-3">File Name</th>
+                            <th scope="col" class="px-6 py-3">Owner</th>
+                            <th scope="col" class="px-6 py-3">Last Modified</th>
+                            <th scope="col" class="px-6 py-3">File Type</th>
+                            <th scope="col" class="px-6 py-3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($files as $file): ?>
+                        <?php foreach ($files as $file): ?>
                             <tr class="bg-white border-b hover:bg-gray-50">
                                 <td class="w-4 p-4">
                                     <div class="flex items-center">
                                         <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center"><img src="media/storage_icons/file-regular.svg" alt="Go" class="w-5 h-5"></td>
+                                <td class="px-6 py-4 flex justify-center items-center">
+                                    <?php
+                                    // Wybierz odpowiednią ikonę na podstawie file_type
+                                    $icons = json_decode(file_get_contents('assets/file_icons.json'), true);
+                                    $fileType = $file['file_type'];
+                                    $icon = isset($icons[$fileType]) ? $icons[$fileType] : $icons['default'];
+                                    ?>
+                                    <img src="<?php echo htmlspecialchars($icon); ?>" alt="Icon" class="w-5 h-5">
+                                </td>
                                 <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
                                 <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
                                 <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
                                 <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
                                 <td class="px-6 py-4 text-center">
-                                <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">Open</a> |
+                                    <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">Open</a> |
                                     <a href="#" class="font-medium text-red-600 hover:underline" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Delete</a> |
                                     <a href="#" class="font-medium text-blue-600 hover:underline" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Share</a>
                                 </td>
@@ -303,7 +292,7 @@ function deleteFile(fileName) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert(fileName + ' został usunięty. ' + response.query + response.query_values.disk +  response.query_values.dbPath);
+                    alert(fileName + ' został usunięty. ' + response.query + ' disk='+  response.query_values.disk + ' dbPath='+response.query_values.dbPath + ' file_name='+response.query_values.file_name + ' path='+response.query_values.path);
                     location.reload();  // Odśwież stronę po usunięciu
                 } else {
                     alert('Wystąpił błąd podczas usuwania: ' + (response.error || 'Nieznany błąd'));
