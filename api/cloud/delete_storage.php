@@ -55,20 +55,6 @@ if (mysqli_stmt_affected_rows($stmt) > 0) {
     if (mysqli_stmt_affected_rows($stmt) > 0) {
         $folder_path = '../../uploads/cloud/' . $disk;
 
-        // Funkcja do usuwania folderu i jego zawartości
-        function deleteFolder($folder_path) {
-            if (is_dir($folder_path)) {
-                $files = scandir($folder_path);
-                foreach ($files as $file) {
-                    if ($file != "." && $file != "..") {
-                        $filePath = $folder_path . '/' . $file;
-                        is_dir($filePath) ? deleteFolder($filePath) : unlink($filePath);
-                    }
-                }
-                rmdir($folder_path);
-            }
-        }
-
         deleteFolder($folder_path); // Usuwanie folderu
 
         echo json_encode(['success' => true]);

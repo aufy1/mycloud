@@ -133,17 +133,19 @@ require_once 'head.php';
                                 <td class="px-6 py-4"><?php echo htmlspecialchars($file['last_modified']); ?></td>
                                 <td class="px-6 py-4"><?php echo htmlspecialchars($file['file_type']); ?></td>
                                 <td class="px-6 py-4">
-                                    <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Open</a> |
+                                <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">Open</a> |
                                     <a href="#" class="font-medium text-red-600 hover:underline" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Delete</a> |
                                     <a href="#" class="font-medium text-blue-600 hover:underline" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Share</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
+
+
                     </table>
 
-    <!-- Nakładka dla przeciągania pliku -->
-    <div id="dropOverlay" class="absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center text-white text-2xl hidden">
+                            <!-- Nakładka dla przeciągania pliku -->
+    <div id="dropOverlay" class="pointer-events-none absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center text-white text-2xl hidden">
         Upuść tutaj
     </div>
 
@@ -207,27 +209,62 @@ document.getElementById('newFolderButton').addEventListener('click', function() 
             }
         }
 
-        const fileTable = document.getElementById('fileTable');
+// Funkcja "Otwórz"
+function openFile(fileName, fileType) {
+    const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
+    const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
+
+    if (fileType === 'folder') {
+        // Jeśli to folder, zmieniamy `path` w URL, aby przejść do jego zawartości
+        const newPath = currentPath ? `${currentPath}/${fileName}` : fileName;
+        window.location.href = `?disk=${disk}&path=${newPath}`;
+    } else {
+        alert('Otwieram plik: ' + fileName);
+        // Tutaj możesz dodać funkcję do podglądu pliku lub jego pobrania
+    }
+}
+
+
+// Funkcja do usuwania pliku
+function deleteFile(fileName, isFolder = false) {
+    if (confirm('Czy na pewno chcesz usunąć ' + (isFolder ? 'folder' : 'plik') + ': ' + fileName + '?')) {
+        const disk = "<?php echo $_GET['disk']; ?>";  // Pobieramy nazwę dysku z URL
+        const path = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>";  // Pobieramy ścieżkę z URL, domyślnie ""
+
+        // Wysyłanie zapytania AJAX do backendu
+        $.ajax({
+            url: 'api/cloud/delete_file.php',
+            method: 'POST',
+            data: {
+                file_name: fileName,
+                disk_name: disk,
+                path: path,
+                is_folder: isFolder  // Nowe dane informujące o tym, czy to folder
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert((isFolder ? 'Folder' : 'Plik') + ' ' + fileName + ' został usunięty.');
+                    location.reload();  // Odśwież stronę po usunięciu pliku/folderu
+                } else {
+                    alert('Wystąpił błąd podczas usuwania ' + (isFolder ? 'folderu' : 'pliku') + ': ' + (response.error || 'Nieznany błąd'));
+                }
+            },
+            error: function() {
+                alert('Wystąpił błąd podczas komunikacji z serwerem.');
+            }
+        });
+    }
+}
+
+
+const fileTable = document.getElementById('fileTable');
 const dropOverlay = document.getElementById('dropOverlay');
 
-// Pokaż nakładkę "Upuść tutaj", gdy plik wchodzi na obszar tabeli
-fileTable.addEventListener('dragenter', function(event) {
-    event.preventDefault();  // Zapobiegamy domyślnemu działaniu
-    dropOverlay.classList.remove('hidden');  // Pokaż nakładkę
-});
-
-// Ukryj nakładkę, gdy plik opuści obszar tabeli
-fileTable.addEventListener('dragleave', function(event) {
-    event.preventDefault();  // Zapobiegamy domyślnemu działaniu
-    dropOverlay.classList.add('hidden');  // Ukryj nakładkę
-});
-
-// Pokaż nakładkę, gdy plik jest przeciągany nad tabelą
+// Pokaż nakładkę, gdy plik jest przeciągany nad obszarem tabeli
 fileTable.addEventListener('dragover', function(event) {
-    event.preventDefault();  // Zapobiegamy domyślnemu działaniu
-    dropOverlay.classList.remove('hidden');  // Pokaż nakładkę
+    event.preventDefault();
+    dropOverlay.classList.remove('hidden');  // Pokazujemy nakładkę
 });
-
 // Po upuszczeniu pliku, ukryj nakładkę i obsłuż przesyłanie pliku
 fileTable.addEventListener('drop', function(event) {
     event.preventDefault();  // Zapobiegamy domyślnemu działaniu
@@ -266,6 +303,12 @@ fileTable.addEventListener('drop', function(event) {
             document.getElementById('upload-status').innerText = "Wystąpił błąd podczas przesyłania.";
         });
     }
+});
+
+// Ukryj nakładkę, gdy plik opuszcza obszar tabeli
+fileTable.addEventListener('dragleave', function(event) {
+    event.preventDefault();
+    dropOverlay.classList.add('hidden');
 });
 
     </script>

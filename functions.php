@@ -71,5 +71,20 @@ function hasAccessToDisk($database, $username, $disk) {
 }
 
 
+        // Funkcja do usuwania folderu i jego zawartości
+        function deleteFolder($folder_path) {
+            if (is_dir($folder_path)) {
+                $files = scandir($folder_path);
+                foreach ($files as $file) {
+                    if ($file != "." && $file != "..") {
+                        $filePath = $folder_path . '/' . $file;
+                        is_dir($filePath) ? deleteFolder($filePath) : unlink($filePath);
+                    }
+                }
+                rmdir($folder_path);
+            }
+        }
+
 
 ?>
+
