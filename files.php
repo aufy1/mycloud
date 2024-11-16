@@ -16,6 +16,8 @@ if (empty($disk)) {
     exit();
 }
 
+
+
 // Połączenie z bazą danych
 require_once 'config.php';
 require_once 'functions.php';
@@ -34,6 +36,12 @@ if (!hasAccessToDisk($database, $_SESSION['username'], $disk)) {
 
 // Pobieramy zmienną path z adresu URL (GET)
 $path = isset($_GET['path']) ? $_GET['path'] : '';
+
+if(!(is_dir('uploads/cloud/' . $disk . '/' . $path)))
+{
+    echo "dupa";
+    exit();
+}
 
 // Jeśli użytkownik ma dostęp, pobieramy pliki z wybranego dysku i ścieżki
 $query = "SELECT * FROM files WHERE disk = ? AND path LIKE ? ORDER BY 

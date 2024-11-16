@@ -87,7 +87,7 @@ function hasAccessToDisk($database, $username, $disk) {
 
 
 
-        function checkPathExists($database, $disk, $fileName, $path) {
+        function checkFileExists($database, $disk, $fileName, $path) {
             // Przygotowanie zapytania SQL, które sprawdza, czy folder istnieje w danym path
             $query = "SELECT COUNT(*) FROM files WHERE file_name = ? AND disk = ? AND file_type = 'folder' AND path = ?";
             $stmt = $database->prepare($query);
@@ -111,7 +111,6 @@ function hasAccessToDisk($database, $username, $disk) {
         //        $dbPath = $disk . '/' . $path . '/' . $fileName;
         //   }
 
-
             echo $dbPath;
 
             $stmt->bind_param('sss', $fileName, $disk, $dbPath);
@@ -123,6 +122,12 @@ function hasAccessToDisk($database, $username, $disk) {
             // Jeśli wynik jest większy niż 0, to folder istnieje
             return $count > 0;
         }
+
+
+        function folderExists($disk, $path) {
+            return is_dir('uploads/cloud/' . $disk . '/' . $path );
+        }
+        
               
 ?>
 
