@@ -28,21 +28,21 @@ mysqli_close($database);
 <main>
     <section class="sekcja1 py-10">
         <div class="container mx-auto">
-            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-                <table id="loginsTable" class="min-w-full table-auto">
+            <div class="px-5 overflow-x-auto bg-white shadow-md rounded-lg">
+                <table id="loginsTable" class="min-w-full text-center table-auto">
                     <thead>
                         <tr class="bg-gray-100 text-gray-600">
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Date & Time</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Location</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">IP Address</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Username</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Successful Login</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Screen Resolution</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Window Resolution</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Color Depth</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Cookies Enabled</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Browser Name</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Browser Language</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Date & Time</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Location</th>
+                            <th class="px-4 py-2 text-sm font-semibold">IP Address</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Username</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Successful Login</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Screen Resolution</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Window Resolution</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Color Depth</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Cookies Enabled</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Browser Name</th>
+                            <th class="px-4 py-2 text-sm font-semibold">Browser Language</th>
                         </tr>
                     </thead>
                     <tbody>

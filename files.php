@@ -7,6 +7,11 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
+// Włącz wyświetlanie błędów dla diagnostyki
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
 $username = $_SESSION['username'];
 $disk = isset($_GET['disk']) ? $_GET['disk'] : '';
 
@@ -81,15 +86,44 @@ require_once 'head.php';
     <main class="py-10">
         <section class="sekcja1">
 
-            <div class="container mx-auto">
 
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xl font-semibold text-gray-900">Dysk: <?php echo htmlspecialchars($disk); ?></span>
+
+<?php
+
+
+if (checkPathExists($database, "$disk", "asd", $path))
+{
+    echo "Folder istnieje!";
+} else {
+    echo "Folder nie istnieje!";
+}
+ ?>
+
+            <div class="container mx-auto">
+                <div class="w-full shadow-md sm:rounded-lg text-gray-500 bg-gray-50 flex items-center justify-between mb-2 text-gray-700 uppercase bg-gray-50 p-2">
+                    <span class="text-md text-gray-900">Dysk: <?php echo htmlspecialchars($disk); ?></span>
+
+                    <!-- Wyświetlanie aktualnej ścieżki -->
+                    <div class="flex items-center">
+                        <button id="backButton" class="flex items-center text-white p-2 bg-blue-100 hover:bg-blue-200 rounded-3xl">
+                            <img src="media/storage_icons/chevron-left-solid.svg" alt="Back" class="w-5 h-5">
+                        </button>
+
+
+                        <!-- Przycisk do zmiany ścieżki -->
+                        <input type="text" id="goToPath" placeholder="Path" class="ml-4 mr-4 p-2 min-w-80 rounded" value="<?php echo htmlspecialchars($path); ?>" />
+                        <button id="submitPath" class="p-2 text-white bg-blue-100 hover:bg-blue-200 rounded-3xl">
+                            <img src="media/storage_icons/arrow-right-solid.svg" alt="Go" class="w-5 h-5">
+                        </button>
+                    </div>
+
+
                     <button id="newFolderButton" class="flex items-center text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded">
                         <img src="media/storage_icons/folder-plus-solid.svg" alt="Add Folder" class="w-5 h-5 mr-2">
                         Utwórz folder
                     </button>
                 </div>
+
 
                 <!-- Formularz do tworzenia folderu (początkowo ukryty) -->
                 <div id="newFolderForm" class="hidden mb-4">
@@ -98,13 +132,18 @@ require_once 'head.php';
                             <input type="text" name="new_folder" id="new_folder" placeholder="Nowy folder" class="w-full p-2 border border-gray-300 rounded-l-md" required>
                             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md">Utwórz katalog</button>
                         </div>
+
+
+
                         <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
                         <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>"> <!-- Ukryty input dla ścieżki -->
                     </form>
                 </div>
 
+
+
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table id="fileTable" class="w-full text-sm text-left rtl:text-right text-gray-500 bg-white">
+    <table id="fileTable" class="w-full text-sm rtl:text-right text-gray-500 bg-white">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
                 <th scope="col" class="p-4">
@@ -113,6 +152,7 @@ require_once 'head.php';
                         <label for="checkbox-all-search" class="sr-only">checkbox</label>
                     </div>
                 </th>
+                <th scope="col" class="px-6 py-3">Type</th>
                 <th scope="col" class="px-6 py-3">File Name</th>
                 <th scope="col" class="px-6 py-3">Owner</th>
                 <th scope="col" class="px-6 py-3">Last Modified</th>
@@ -128,11 +168,12 @@ require_once 'head.php';
                                         <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                     </div>
                                 </td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($file['file_name']); ?></td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($file['owner']); ?></td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($file['last_modified']); ?></td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($file['file_type']); ?></td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center"><img src="media/storage_icons/file-regular.svg" alt="Go" class="w-5 h-5"></td>
+                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
+                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
+                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
+                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
+                                <td class="px-6 py-4 text-center">
                                 <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">Open</a> |
                                     <a href="#" class="font-medium text-red-600 hover:underline" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Delete</a> |
                                     <a href="#" class="font-medium text-blue-600 hover:underline" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Share</a>
@@ -166,6 +207,26 @@ document.getElementById('newFolderButton').addEventListener('click', function() 
             const form = document.getElementById('newFolderForm');
             form.classList.toggle('hidden');
         });
+
+
+        document.getElementById('backButton').addEventListener('click', function() {
+    const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy aktualną ścieżkę
+    const pathSegments = currentPath.split('/'); // Dzielimy ścieżkę na segmenty
+    pathSegments.pop(); // Usuwamy ostatni segment (cofanie się o jeden poziom)
+    const newPath = pathSegments.join('/'); // Łączymy ponownie segmenty
+
+    // Przekierowanie do nowej ścieżki
+    window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`;
+});
+
+document.getElementById('submitPath').addEventListener('click', function() {
+    const newPath = document.getElementById('goToPath').value.trim(); // Pobieramy nową ścieżkę z pola tekstowego
+    if (newPath) {
+        window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`; // Przekierowanie na nową ścieżkę
+    } else {
+        alert("Wprowadź ścieżkę.");
+    }
+});
 
         // Funkcja "Otwórz"
         function openFile(fileName) {
@@ -225,9 +286,9 @@ function openFile(fileName, fileType) {
 }
 
 
-// Funkcja do usuwania pliku
-function deleteFile(fileName, isFolder = false) {
-    if (confirm('Czy na pewno chcesz usunąć ' + (isFolder ? 'folder' : 'plik') + ': ' + fileName + '?')) {
+// Funkcja do usuwania pliku lub folderu
+function deleteFile(fileName) {
+    if (confirm('Czy na pewno chcesz usunąć: ' + fileName + '?')) {
         const disk = "<?php echo $_GET['disk']; ?>";  // Pobieramy nazwę dysku z URL
         const path = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>";  // Pobieramy ścieżkę z URL, domyślnie ""
 
@@ -238,15 +299,14 @@ function deleteFile(fileName, isFolder = false) {
             data: {
                 file_name: fileName,
                 disk_name: disk,
-                path: path,
-                is_folder: isFolder  // Nowe dane informujące o tym, czy to folder
+                path: path
             },
             success: function(response) {
                 if (response.success) {
-                    alert((isFolder ? 'Folder' : 'Plik') + ' ' + fileName + ' został usunięty.');
-                    location.reload();  // Odśwież stronę po usunięciu pliku/folderu
+                    alert(fileName + ' został usunięty. ' + response.query + response.query_values.disk +  response.query_values.dbPath);
+                    location.reload();  // Odśwież stronę po usunięciu
                 } else {
-                    alert('Wystąpił błąd podczas usuwania ' + (isFolder ? 'folderu' : 'pliku') + ': ' + (response.error || 'Nieznany błąd'));
+                    alert('Wystąpił błąd podczas usuwania: ' + (response.error || 'Nieznany błąd'));
                 }
             },
             error: function() {
@@ -255,6 +315,8 @@ function deleteFile(fileName, isFolder = false) {
         });
     }
 }
+
+
 
 
 const fileTable = document.getElementById('fileTable');

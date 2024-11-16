@@ -91,14 +91,14 @@ if (isset($_POST['new_folder']) && !empty($_POST['new_folder'])) {
             exit();
         }
 
- 
         // Tworzenie ścieżki do katalogu w bazie danych, upewniając się, że ukośnik jest po nazwie dysku
-$db_path = $disk . '/' . ltrim(trim($path, '/'), '/'); // Upewniamy się, że `$disk` ma ukośnik po, a `$path` jest dobrze sformatowane
-
+        $db_path = $disk . '/' . ltrim(trim($path, '/'), '/'); // Upewniamy się, że `$disk` ma ukośnik po, a `$path` jest dobrze sformatowane
 
         $stmt->bind_param('ssssss', $disk, $db_path, $file_name, $file_type, $owner, $shared_with);
 
-        // Debugowanie wartości przed wykonaniem zapytania
+        header('Location: index.php');
+
+        /* Debugowanie wartości przed wykonaniem zapytania
         echo json_encode([
             'debug' => [
                 'disk' => $disk,
@@ -109,6 +109,7 @@ $db_path = $disk . '/' . ltrim(trim($path, '/'), '/'); // Upewniamy się, że `$
                 'shared_with' => $shared_with
             ]
         ]);
+        */
 
         // Wykonanie zapytania
         if (!$stmt->execute()) {
@@ -119,7 +120,7 @@ $db_path = $disk . '/' . ltrim(trim($path, '/'), '/'); // Upewniamy się, że `$
         // Zamykamy zapytanie
         $stmt->close();
         echo json_encode(['success' => 'Katalog został utworzony pomyślnie!']);
-        
+        header('Location: ../../files.php?disk=' . $disk . ($path ? '&path=' . $path : ''));
         exit();
     }
 } else {

@@ -86,5 +86,43 @@ function hasAccessToDisk($database, $username, $disk) {
         }
 
 
+
+        function checkPathExists($database, $disk, $fileName, $path) {
+            // Przygotowanie zapytania SQL, które sprawdza, czy folder istnieje w danym path
+            $query = "SELECT COUNT(*) FROM files WHERE file_name = ? AND disk = ? AND file_type = 'folder' AND path = ?";
+            $stmt = $database->prepare($query);
+        
+            if (!$stmt) {
+                echo "Błąd zapytania: " . mysqli_error($database);
+                exit();
+            }
+        
+            if($path)
+            {
+                $dbPath = $disk . '/' . $path;  
+            }
+            else
+            {
+                $dbPath = $disk . '/';
+            }
+
+            if (substr_count($path, '/') > 1) 
+            {
+                $dbPath = $disk . '/' . $path . '/' . $fileName;
+            }
+
+
+            echo $dbPath;
+
+            $stmt->bind_param('sss', $fileName, $disk, $dbPath);
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
+            $stmt->close();
+        
+            // Jeśli wynik jest większy niż 0, to folder istnieje
+            return $count > 0;
+        }
+              
 ?>
 
