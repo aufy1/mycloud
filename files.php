@@ -146,7 +146,7 @@ require_once 'head.php';
                             <th scope="col" class="px-6 py-3">Owner</th>
                             <th scope="col" class="px-6 py-3">Last Modified</th>
                             <th scope="col" class="px-6 py-3">File Type</th>
-                            <th scope="col" class="px-6 py-3">Action</th>
+                            <th scope="col" class="py-3">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,46 +155,62 @@ require_once 'head.php';
                         $fileIcons = $icons['file_icons'];
                         $actionIcons = $icons['action_icons'];
                     ?>
-                    <?php foreach ($files as $file): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50">
-                            <td class="w-4 p-4">
-                                <div class="flex items-center">
-                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 flex justify-center items-center">
-                                <?php
-                                $fileType = $file['file_type'];
-                                $icon = isset($fileIcons[$fileType]) ? $fileIcons[$fileType] : $fileIcons['default'];
-                                ?>
-                                <img src="<?php echo htmlspecialchars($icon); ?>" alt="Icon" class="w-5 h-5">
-                            </td>
-                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
-                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
-                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
-                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="flex justify-center items-center gap-4">
-                                    <a href="#" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">
-                                        <img src="<?php echo htmlspecialchars($actionIcons['folder-open']); ?>" alt="Open" class="w-5 h-5" title="Open">
-                                    </a>
-                                    <a href="#" onclick="play('<?php echo htmlspecialchars($file['file_name']); ?>')">
-                                        <img src="<?php echo htmlspecialchars($actionIcons['play']); ?>" alt="Play" class="w-5 h-5" title="Play">
-                                    </a>
-                                    <a href="#" onclick="downloadFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
-                                        <img src="<?php echo htmlspecialchars($actionIcons['download']); ?>" alt="Download" class="w-5 h-5" title="Download">
-                                    </a>
-                                    <a href="#" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
-                                        <img src="<?php echo htmlspecialchars($actionIcons['delete']); ?>" alt="Delete" class="w-5 h-5" title="Delete">
-                                    </a>
-                                    <a href="#" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
-                                        <img src="<?php echo htmlspecialchars($actionIcons['share']); ?>" alt="Share" class="w-5 h-5" title="Share">
-                                    </a>
-                                </div>
-                            </td>
+<?php foreach ($files as $file): ?>
+    <tr class="bg-white border-b hover:bg-gray-50">
+        <td class="w-4 p-4">
+            <div class="flex items-center">
+                <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+            </div>
+        </td>
+        <td class="px-6 py-4 flex justify-center items-center">
+            <?php
+            $fileType = $file['file_type'];
+            $icon = isset($fileIcons[$fileType]) ? $fileIcons[$fileType] : $fileIcons['default'];
+            ?>
+            <img src="<?php echo htmlspecialchars($icon); ?>" alt="Icon" class="w-5 h-5">
+        </td>
+        <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
+        <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
+        <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
+        <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
+        <td class="py-4 text-center">
+        <div class="w-32 mt-0 mb-0 ml-auto mr-auto">
+    <div class="flex justify-end gap-4">
+        <!-- Open button visible only for folders -->
+        <?php if ($fileType == 'folder'): ?>
+            <a href="#" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">
+                <img src="<?php echo htmlspecialchars($actionIcons['folder-open']); ?>" alt="Open" class="w-5 h-5" title="Open">
+            </a>
+        <?php endif; ?>
 
-                        </tr>
-                    <?php endforeach; ?>
+        <!-- Play button visible only for jpg, bmp, mp4, png, mp3 -->
+        <?php if (in_array($fileType, ['jpg', 'bmp', 'mp4', 'png', 'mp3'])): ?>
+            <a href="#" onclick="play('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                <img src="<?php echo htmlspecialchars($actionIcons['play']); ?>" alt="Play" class="w-5 h-5" title="Play">
+            </a>
+        <?php endif; ?>
+
+        <!-- Download and Share buttons visible only for non-folder files -->
+        <?php if ($fileType != 'folder'): ?>
+            <a href="#" onclick="downloadFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                <img src="<?php echo htmlspecialchars($actionIcons['download']); ?>" alt="Download" class="w-5 h-5" title="Download">
+            </a>
+            <a href="#" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                <img src="<?php echo htmlspecialchars($actionIcons['share']); ?>" alt="Share" class="w-5 h-5" title="Share">
+            </a>
+        <?php endif; ?>
+
+        <!-- Delete button visible for all files -->
+        <a href="#" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+            <img src="<?php echo htmlspecialchars($actionIcons['delete']); ?>" alt="Delete" class="w-5 h-5" title="Delete">
+        </a>
+    </div>
+</div>
+
+        </td>
+    </tr>
+<?php endforeach; ?>
+
                     </tbody>
                 </table>
 
