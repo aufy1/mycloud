@@ -132,55 +132,72 @@ require_once 'head.php';
 
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table id="fileTable" class="w-full text-sm rtl:text-right text-gray-500 bg-white">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-                <th scope="col" class="p-4">
-                    <div class="flex items-center">
-                        <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-blue-600  ring-offset-gray-800  focus:ring-offset-gray-800 focus:ring-2  bg-gray-700  border-gray-600">
-                        <label for="checkbox-all-search" class="sr-only">checkbox</label>
-                    </div>
-                </th>
+                <table id="fileTable" class="w-full text-sm rtl:text-right text-gray-500 bg-white">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="p-4">
+                                <div class="flex items-center">
+                                    <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-blue-600  ring-offset-gray-800  focus:ring-offset-gray-800 focus:ring-2  bg-gray-700  border-gray-600">
+                                    <label for="checkbox-all-search" class="sr-only">checkbox</label>
+                                </div>
+                            </th>
                             <th scope="col" class="px-6 py-3">ICON</th>
                             <th scope="col" class="px-6 py-3">File Name</th>
                             <th scope="col" class="px-6 py-3">Owner</th>
                             <th scope="col" class="px-6 py-3">Last Modified</th>
                             <th scope="col" class="px-6 py-3">File Type</th>
                             <th scope="col" class="px-6 py-3">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($files as $file): ?>
-                            <tr class="bg-white border-b hover:bg-gray-50">
-                                <td class="w-4 p-4">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 flex justify-center items-center">
-                                    <?php
-                                    // Wybierz odpowiednią ikonę na podstawie file_type
-                                    $icons = json_decode(file_get_contents('assets/file_icons.json'), true);
-                                    $fileType = $file['file_type'];
-                                    $icon = isset($icons[$fileType]) ? $icons[$fileType] : $icons['default'];
-                                    ?>
-                                    <img src="<?php echo htmlspecialchars($icon); ?>" alt="Icon" class="w-5 h-5">
-                                </td>
-                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
-                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
-                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
-                                <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
-                                <td class="px-6 py-4 text-center">
-                                    <a href="#" class="font-medium text-blue-600 hover:underline" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">Open</a> |
-                                    <a href="#" class="font-medium text-red-600 hover:underline" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Delete</a> |
-                                    <a href="#" class="font-medium text-blue-600 hover:underline" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">Share</a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php 
+                        $icons = json_decode(file_get_contents('assets/storage_icons.json'), true); 
+                        $fileIcons = $icons['file_icons'];
+                        $actionIcons = $icons['action_icons'];
+                    ?>
+                    <?php foreach ($files as $file): ?>
+                        <tr class="bg-white border-b hover:bg-gray-50">
+                            <td class="w-4 p-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 flex justify-center items-center">
+                                <?php
+                                $fileType = $file['file_type'];
+                                $icon = isset($fileIcons[$fileType]) ? $fileIcons[$fileType] : $fileIcons['default'];
+                                ?>
+                                <img src="<?php echo htmlspecialchars($icon); ?>" alt="Icon" class="w-5 h-5">
+                            </td>
+                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_name']); ?></td>
+                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
+                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
+                            <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex justify-center items-center gap-4">
+                                    <a href="#" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">
+                                        <img src="<?php echo htmlspecialchars($actionIcons['folder-open']); ?>" alt="Open" class="w-5 h-5" title="Open">
+                                    </a>
+                                    <a href="#" onclick="play('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                                        <img src="<?php echo htmlspecialchars($actionIcons['play']); ?>" alt="Play" class="w-5 h-5" title="Play">
+                                    </a>
+                                    <a href="#" onclick="downloadFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                                        <img src="<?php echo htmlspecialchars($actionIcons['download']); ?>" alt="Download" class="w-5 h-5" title="Download">
+                                    </a>
+                                    <a href="#" onclick="deleteFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                                        <img src="<?php echo htmlspecialchars($actionIcons['delete']); ?>" alt="Delete" class="w-5 h-5" title="Delete">
+                                    </a>
+                                    <a href="#" onclick="shareFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
+                                        <img src="<?php echo htmlspecialchars($actionIcons['share']); ?>" alt="Share" class="w-5 h-5" title="Share">
+                                    </a>
+                                </div>
+                            </td>
 
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
 
-                    </table>
 
                             <!-- Nakładka dla przeciągania pliku -->
     <div id="dropOverlay" class="pointer-events-none absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center text-white text-2xl hidden">
@@ -266,6 +283,46 @@ document.getElementById('submitPath').addEventListener('click', function() {
                 });
             }
         }
+
+
+        function downloadFile(fileName) {
+    // Przygotowanie danych do wygenerowania tokenu
+            const data = {
+            fileName: fileName,
+            disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
+            path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>"
+        };
+
+            // Żądanie tokenu z backendu
+            fetch('api/cloud/generate_token.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text()) // Tymczasowo odbierz jako tekst
+        .then(text => {
+            console.log("Response from server:", text); // Zaloguj odpowiedź serwera
+            return JSON.parse(text); // Ręcznie zparsuj JSON
+        })
+        .then(result => {
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            const downloadUrl = `api/cloud/download_file.php?token=${encodeURIComponent(result.token)}`;
+            
+            window.location.href = downloadUrl;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
+
+        }
+
+
+
 
 // Funkcja "Otwórz"
 function openFile(fileName, fileType) {

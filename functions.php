@@ -124,10 +124,22 @@ function hasAccessToDisk($database, $username, $disk) {
         }
 
 
-        function folderExists($disk, $path) {
-            return is_dir('uploads/cloud/' . $disk . '/' . $path );
-        }
-        
-              
-?>
 
+
+        // Funkcja do tworzenia tokenu
+function generateToken($fileName, $disk, $path, $expiryTime, $username, $secretKey) {
+    $payload = json_encode([
+        'fileName' => $fileName,
+        'disk' => $disk,
+        'path' => $path ?? '',
+        'expiryTime' => $expiryTime,
+        'username' => $username
+    ]);
+    
+    // Generowanie tokenu
+    $base64Payload = base64_encode($payload);
+    $hmac = hash_hmac('sha256', $payload, $secretKey);
+
+    return $base64Payload . '.' . $hmac;
+}
+?>
