@@ -10,7 +10,7 @@ require_once 'config.php';
 ?>
 
 <?php require_once 'head.php'; ?>	
-<body>
+<body class="bg-gray-100">
 <?php require_once 'header.php'; ?>	
 
 <main class="py-10">
