@@ -39,7 +39,7 @@ $path = isset($_GET['path']) ? $_GET['path'] : '';
 
 if(!(is_dir('uploads/cloud/' . $disk . '/' . $path)))
 {
-    echo "dupa";
+    echo "nawet nie próbuj";
     exit();
 }
 
@@ -86,12 +86,27 @@ require_once 'head.php';
 <body class="bg-gray-100">
     <?php require_once 'header.php'; ?>
 
+    <div id="mediaContainer" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50" style="display: none;">
+    <div class="relative bg-white p-4 rounded-lg max-w-full max-h-full overflow-auto">
+        <!-- Przycisk X w formie lokalnego pliku SVG, umieszczony poza obrazem -->
+        <button id="closeButton" class="absolute top-0 right-0 text-white bg-transparent border-0 p-2 focus:outline-none z-50">
+            <!-- Ikona SVG X z lokalnego pliku -->
+            <img src="media/storage_icons/x-solid.svg" alt="Close" class="w-4 h-4">
+        </button>
+
+        <!-- Miejsce na media (obrazek lub film) -->
+        <div id="mediaContent" class="flex justify-center p-3 items-center">
+            <!-- Treść media (obrazek lub film) pojawi się tutaj -->
+        </div>
+    </div>
+</div>
+
+
     <main class="py-10">
         <section class="sekcja1">
             <div class="container mx-auto">
                 <div class="w-full shadow-md sm:rounded-lg text-gray-500 bg-gray-50 flex items-center justify-between mb-2 text-gray-700 uppercase bg-gray-50 p-2">
                     <span class="text-md text-gray-900">Dysk: <?php echo htmlspecialchars($disk); ?></span>
-
                     <!-- Wyświetlanie aktualnej ścieżki -->
                     <div class="flex items-center">
                         <button id="backButton" class="flex items-center text-white p-2 bg-blue-100 hover:bg-blue-200 rounded-3xl">
@@ -113,22 +128,26 @@ require_once 'head.php';
                     </button>
                 </div>
 
+                <div id="newFolderForm" class="hidden fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+    <div class="relative bg-white p-8 rounded-lg max-w-sm w-full">
+        <!-- Przycisk X w formie SVG, umieszczony poza formularzem -->
+        <button id="closeFormButton" class="absolute top-0 right-0 text-white bg-transparent border-0 p-2 focus:outline-none z-50">
+            <!-- Ikona SVG dla X -->
+            <img src="media/storage_icons/x-solid.svg" alt="Close" class="w-4 h-4">
+        </button>
 
-                <!-- Formularz do tworzenia folderu (początkowo ukryty) -->
-                <div id="newFolderForm" class="hidden mb-4">
-                    <form action="api/cloud/create_dir.php" method="POST" class="w-full max-w-sm">
-                        <div class="flex items-center">
-                            <input type="text" name="new_folder" id="new_folder" placeholder="Nowy folder" class="w-full p-2 border border-gray-300 rounded-l-md" required>
-                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md">Utwórz katalog</button>
-                        </div>
+        <!-- Formularz -->
+        <form action="api/cloud/create_dir.php" method="POST">
+            <div class="flex items-center">
+                <input type="text" name="new_folder" id="new_folder" placeholder="Nowy folder" class="w-full p-2 border border-gray-300 rounded-l-md" required>
+                <button type="submit" class="bg-blue-500 text-white p-2  rounded-r-md">Utwórz</button>
+            </div>
 
-
-
-                        <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
-                        <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>"> <!-- Ukryty input dla ścieżki -->
-                    </form>
-                </div>
-
+            <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
+            <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>"> <!-- Ukryty input dla ścieżki -->
+        </form>
+    </div>
+</div>
 
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -232,15 +251,17 @@ require_once 'head.php';
     <?php require_once 'footer.php'; ?>
 
     <script>
+         const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
+         const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
+         const username = "<?php echo $_SESSION['username']; ?>"; // Nazwa użytkownika
+
 
 document.getElementById('newFolderButton').addEventListener('click', function() {
             const form = document.getElementById('newFolderForm');
-            form.classList.toggle('hidden');
+            document.getElementById('newFolderForm').style.display = 'flex';
         });
 
-
-        document.getElementById('backButton').addEventListener('click', function() {
-    const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy aktualną ścieżkę
+    document.getElementById('backButton').addEventListener('click', function() {
     const pathSegments = currentPath.split('/'); // Dzielimy ścieżkę na segmenty
     pathSegments.pop(); // Usuwamy ostatni segment (cofanie się o jeden poziom)
     const newPath = pathSegments.join('/'); // Łączymy ponownie segmenty
@@ -248,6 +269,16 @@ document.getElementById('newFolderButton').addEventListener('click', function() 
     // Przekierowanie do nowej ścieżki
     window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`;
 });
+
+document.getElementById('closeFormButton').addEventListener('click', function() {
+        document.getElementById('newFolderForm').style.display = 'none';
+    });
+
+    // Funkcja do otwierania formularza (np. przy kliknięciu przycisku)
+    function openNewFolderForm() {
+        document.getElementById('newFolderForm').style.display = 'flex';
+    }
+
 
 document.getElementById('submitPath').addEventListener('click', function() {
     const newPath = document.getElementById('goToPath').value.trim(); // Pobieramy nową ścieżkę z pola tekstowego
@@ -258,23 +289,68 @@ document.getElementById('submitPath').addEventListener('click', function() {
     }
 });
 
-        // Funkcja "Otwórz"
-        function openFile(fileName) {
-            alert('Otwieram plik: ' + fileName);
-            // Możesz dodać funkcjonalność do otwierania pliku, np. przez przekierowanie na stronę lub inny sposób
+function play(fileName) {
+    const data = {
+        fileName: fileName,
+        disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
+        path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>"
+    };
+
+    fetch('api/cloud/generate_token.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(text => {
+        console.log("Response from server:", text);
+        return JSON.parse(text);
+    })
+    .then(result => {
+        if (result.error) {
+            throw new Error(result.error);
         }
 
-        // Funkcja "Usuń"
-        function deleteFile(fileName) {
-            if (confirm('Czy na pewno chcesz usunąć plik: ' + fileName + '?')) {
-                alert('Plik ' + fileName + ' został usunięty.');
-                // Dodaj kod do usuwania pliku z bazy danych
-            }
+        const mediaUrl = `api/cloud/streaming.php?token=${encodeURIComponent(result.token)}`;
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const mediaContainer = document.getElementById('mediaContent');
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
+            mediaContainer.innerHTML = `<img src="${mediaUrl}" alt="Media" style="max-width: 100%; height: auto;" />`;
+        } else if (['mp4', 'webm', 'ogg'].includes(fileExtension)) {
+            mediaContainer.innerHTML = ` 
+                <video controls style="max-width: 100%; height: auto;">
+                    <source src="${mediaUrl}" type="video/${fileExtension}">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+        } else {
+            throw new Error('Unsupported file type');
         }
+
+        const mediaModal = document.getElementById('mediaContainer');
+        mediaModal.style.display = 'flex';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message);
+    });
+}
+
+document.getElementById('closeButton').addEventListener('click', function() {
+    const mediaModal = document.getElementById('mediaContainer');
+    mediaModal.style.display = 'none';
+});
+
+
+
+
+
 
         // Funkcja "Udostępnij"
         function shareFile(fileName) {
-            const username = "<?php echo $_SESSION['username']; ?>"; // Nazwa użytkownika
             let sharedWith = prompt('Wprowadź nazwę użytkownika, z którym chcesz udostępnić plik:');
             if (sharedWith) {
                 // Wysłanie zapytania AJAX do backendu w celu udostępnienia pliku
@@ -342,16 +418,11 @@ document.getElementById('submitPath').addEventListener('click', function() {
 
 // Funkcja "Otwórz"
 function openFile(fileName, fileType) {
-    const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
-    const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
+
 
     if (fileType === 'folder') {
-        // Jeśli to folder, zmieniamy `path` w URL, aby przejść do jego zawartości
         const newPath = currentPath ? `${currentPath}/${fileName}` : fileName;
         window.location.href = `?disk=${disk}&path=${newPath}`;
-    } else {
-        alert('Otwieram plik: ' + fileName);
-        // Tutaj możesz dodać funkcję do podglądu pliku lub jego pobrania
     }
 }
 
