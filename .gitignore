@@ -15,13 +15,14 @@ node_modules/
 .vscode/
 *.code-workspace
 
-#temp, sql, cache
+#temp, sql, cache, log
 *.temp
 *.tmp
 .phpunit.result.cache
 *.sql
 *.sqlite
 *.sqlite3
+*.log
 
 #media, uploads
 uploads/cloud

@@ -63,7 +63,6 @@ if (!is_writable($cloudDir)) {
 if (!file_exists($newFolderPath)) {
     if (mkdir($newFolderPath, 0777, true)) {
         // Zapis do bazy danych
-        session_start(); // Rozpoczynamy sesję, aby uzyskać sesyjnego użytkownika
         $owner = $_SESSION['username']; // Pobieramy nazwę użytkownika z sesji
         $disk_name = $newFolderName; // Nazwa folderu to identyfikator
         $shared_with = ''; // Na początku folder nie jest udostępniany

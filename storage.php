@@ -208,22 +208,24 @@ mysqli_close($database);
 
 
 
-        // Funkcja tworzenia nowego dysku (folderu)
-        function createNewDisk() {
+// Funkcja tworzenia nowego dysku (folderu)
+function createNewDisk() {
     // Wysyłamy żądanie do serwera, aby utworzyć nowy folder
     $.ajax({
         url: 'api/cloud/create_storage.php', // Ścieżka do pliku PHP, który stworzy folder
         method: 'POST',
-        data: {},
+        data: {}, // Brak danych, ponieważ na razie nie przekazujemy nic do serwera
         success: function(response) {
+            console.log('Odpowiedź serwera:', response); // Logujemy odpowiedź serwera
             if (response.success) {
                 alert('Nowy dysk został utworzony! Folder: ' + response.folder);
-                location.reload();
+                location.reload(); // Odświeżenie strony, aby zobaczyć zmiany
             } else {
                 alert('Wystąpił błąd przy tworzeniu dysku: ' + (response.error || 'Nieznany błąd'));
             }
         },
-        error: function() {
+        error: function(jqXHR, textStatus, errorThrown) {
+
             alert('Wystąpił błąd w trakcie komunikacji z serwerem.');
         }
     });
