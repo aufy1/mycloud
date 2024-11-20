@@ -203,7 +203,7 @@ require_once 'head.php';
         <?php endif; ?>
 
         <!-- Play button visible only for jpg, bmp, mp4, png, mp3 -->
-        <?php if (in_array($fileType, ['jpg', 'bmp', 'mp4', 'png', 'mp3'])): ?>
+        <?php if (in_array($fileType, ['jpg', 'bmp', 'mp4', 'png', 'svg', 'mp3'])): ?>
             <a href="#" onclick="play('<?php echo htmlspecialchars($file['file_name']); ?>')">
                 <img src="<?php echo htmlspecialchars($actionIcons['play']); ?>" alt="Play" class="w-5 h-5" title="Play">
             </a>
@@ -250,270 +250,316 @@ require_once 'head.php';
 
     <?php require_once 'footer.php'; ?>
 
-    <script>
-         const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
-         const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
-         const username = "<?php echo $_SESSION['username']; ?>"; // Nazwa użytkownika
+<script>
+const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
+const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
+const username = "<?php echo $_SESSION['username']; ?>"; // Nazwa użytkownika
 
+document
+  .getElementById("newFolderButton")
+  .addEventListener("click", function () {
+    const form = document.getElementById("newFolderForm");
+    document.getElementById("newFolderForm").style.display = "flex";
+  });
 
-document.getElementById('newFolderButton').addEventListener('click', function() {
-            const form = document.getElementById('newFolderForm');
-            document.getElementById('newFolderForm').style.display = 'flex';
-        });
+document.getElementById("backButton").addEventListener("click", function () {
+  const pathSegments = currentPath.split("/"); // Dzielimy ścieżkę na segmenty
+  pathSegments.pop(); // Usuwamy ostatni segment (cofanie się o jeden poziom)
+  const newPath = pathSegments.join("/"); // Łączymy ponownie segmenty
 
-    document.getElementById('backButton').addEventListener('click', function() {
-    const pathSegments = currentPath.split('/'); // Dzielimy ścieżkę na segmenty
-    pathSegments.pop(); // Usuwamy ostatni segment (cofanie się o jeden poziom)
-    const newPath = pathSegments.join('/'); // Łączymy ponownie segmenty
-
-    // Przekierowanie do nowej ścieżki
-    window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`;
+  // Przekierowanie do nowej ścieżki
+  window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`;
 });
 
-document.getElementById('closeFormButton').addEventListener('click', function() {
-        document.getElementById('newFolderForm').style.display = 'none';
-    });
+document
+  .getElementById("closeFormButton")
+  .addEventListener("click", function () {
+    document.getElementById("newFolderForm").style.display = "none";
+  });
 
-    // Funkcja do otwierania formularza (np. przy kliknięciu przycisku)
-    function openNewFolderForm() {
-        document.getElementById('newFolderForm').style.display = 'flex';
-    }
+// Funkcja do otwierania formularza (np. przy kliknięciu przycisku)
+function openNewFolderForm() {
+  document.getElementById("newFolderForm").style.display = "flex";
+}
 
-
-document.getElementById('submitPath').addEventListener('click', function() {
-    const newPath = document.getElementById('goToPath').value.trim(); // Pobieramy nową ścieżkę z pola tekstowego
-    if (newPath) {
-        window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`; // Przekierowanie na nową ścieżkę
-    } else {
-        alert("Wprowadź ścieżkę.");
-    }
+document.getElementById("submitPath").addEventListener("click", function () {
+  const newPath = document.getElementById("goToPath").value.trim(); // Pobieramy nową ścieżkę z pola tekstowego
+  if (newPath) {
+    window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`; // Przekierowanie na nową ścieżkę
+  } else {
+    alert("Wprowadź ścieżkę.");
+  }
 });
 
 function play(fileName) {
-    const data = {
-        fileName: fileName,
-        disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
-        path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>"
-    };
+  const data = {
+    fileName: fileName,
+    disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
+    path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>",
+  };
 
-    fetch('api/cloud/generate_token.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+  fetch("api/cloud/generate_token.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.text())
+    .then((text) => {
+      console.log("Response from server:", text);
+      return JSON.parse(text);
     })
-    .then(response => response.text())
-    .then(text => {
-        console.log("Response from server:", text);
-        return JSON.parse(text);
-    })
-    .then(result => {
-        if (result.error) {
-            throw new Error(result.error);
+    .then((result) => {
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      const mediaUrl = `api/cloud/streaming.php?token=${encodeURIComponent(
+        result.token
+      )}`;
+      const fileExtension = fileName.split(".").pop().toLowerCase();
+      const mediaContainer = document.getElementById("mediaContent");
+
+      if (
+        ["jpg", "jpeg", "png", "gif", "svg", "bmp", "webp"].includes(
+          fileExtension
+        )
+      ) {
+        mediaContainer.innerHTML = `<img src="${mediaUrl}" alt="Media" style="max-width: 100%; height: auto;" />`;
+        if (fileExtension === "svg") {
+          const svgElement = mediaContainer.querySelector("img");
+          svgElement.style.width = "100%";
+          svgElement.style.height = "auto";
         }
+      } else if (["mp4", "webm", "ogg"].includes(fileExtension)) {
+        mediaContainer.innerHTML = `
+          <video id="mediaVideo" controls style="max-width: 100%; height: auto;">
+              <source src="${mediaUrl}" type="video/${fileExtension}">
+              Your browser does not support the video tag.
+          </video>
+        `;
+      } else if (["mp3"].includes(fileExtension)) {
+        mediaContainer.innerHTML = `
+          <audio id="mediaAudio" controls style="width: 300px; height: 20px;">
+              <source src="${mediaUrl}" type="audio/mpeg">
+          </audio>
+        `;
+      } else {
+        throw new Error("Unsupported file type");
+      }
 
-        const mediaUrl = `api/cloud/streaming.php?token=${encodeURIComponent(result.token)}`;
-        const fileExtension = fileName.split('.').pop().toLowerCase();
-        const mediaContainer = document.getElementById('mediaContent');
-
-        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
-            mediaContainer.innerHTML = `<img src="${mediaUrl}" alt="Media" style="max-width: 100%; height: auto;" />`;
-        } else if (['mp4', 'webm', 'ogg'].includes(fileExtension)) {
-            mediaContainer.innerHTML = ` 
-                <video controls style="max-width: 100%; height: auto;">
-                    <source src="${mediaUrl}" type="video/${fileExtension}">
-                    Your browser does not support the video tag.
-                </video>
-            `;
-        } else {
-            throw new Error('Unsupported file type');
-        }
-
-        const mediaModal = document.getElementById('mediaContainer');
-        mediaModal.style.display = 'flex';
+      const mediaModal = document.getElementById("mediaContainer");
+      mediaModal.style.display = "flex";
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message);
+    .catch((error) => {
+      console.error("Error:", error);
+      alert(error.message);
     });
 }
 
-document.getElementById('closeButton').addEventListener('click', function() {
-    const mediaModal = document.getElementById('mediaContainer');
-    mediaModal.style.display = 'none';
+document.getElementById("closeButton").addEventListener("click", function () {
+  const mediaModal = document.getElementById("mediaContainer");
+  mediaModal.style.display = "none";
+
+  // Zatrzymanie odtwarzania wideo
+  const videoElement = document.getElementById("mediaVideo");
+  if (videoElement) {
+    videoElement.pause();
+    videoElement.src = ""; // Zwolnienie źródła
+  }
+
+  // Zatrzymanie odtwarzania audio
+  const audioElement = document.getElementById("mediaAudio");
+  if (audioElement) {
+    audioElement.pause();
+    audioElement.src = ""; // Zwolnienie źródła
+  }
+
+  // Usunięcie zawartości kontenera mediów
+  const mediaContainer = document.getElementById("mediaContent");
+  mediaContainer.innerHTML = "";
 });
 
 
-
-
-
-
-        // Funkcja "Udostępnij"
-        function shareFile(fileName) {
-            let sharedWith = prompt('Wprowadź nazwę użytkownika, z którym chcesz udostępnić plik:');
-            if (sharedWith) {
-                // Wysłanie zapytania AJAX do backendu w celu udostępnienia pliku
-                $.ajax({
-                    url: 'api/cloud/share_file.php',
-                    method: 'POST',
-                    data: {
-                        file_name: fileName,
-                        owner: username,
-                        shared_with: sharedWith
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            alert('Plik został udostępniony użytkownikowi ' + sharedWith);
-                        } else {
-                            alert('Wystąpił błąd podczas udostępniania pliku: ' + (response.error || 'Nieznany błąd'));
-                        }
-                    },
-                    error: function() {
-                        alert('Wystąpił błąd w trakcie komunikacji z serwerem.');
-                    }
-                });
-            }
+// Funkcja "Udostępnij"
+function shareFile(fileName) {
+  let sharedWith = prompt(
+    "Wprowadź nazwę użytkownika, z którym chcesz udostępnić plik:"
+  );
+  if (sharedWith) {
+    // Wysłanie zapytania AJAX do backendu w celu udostępnienia pliku
+    $.ajax({
+      url: "api/cloud/share_file.php",
+      method: "POST",
+      data: {
+        file_name: fileName,
+        owner: username,
+        shared_with: sharedWith,
+      },
+      success: function (response) {
+        if (response.success) {
+          alert("Plik został udostępniony użytkownikowi " + sharedWith);
+        } else {
+          alert(
+            "Wystąpił błąd podczas udostępniania pliku: " +
+              (response.error || "Nieznany błąd")
+          );
         }
+      },
+      error: function () {
+        alert("Wystąpił błąd w trakcie komunikacji z serwerem.");
+      },
+    });
+  }
+}
 
+function downloadFile(fileName) {
+  // Przygotowanie danych do wygenerowania tokenu
+  const data = {
+    fileName: fileName,
+    disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
+    path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>",
+  };
 
-        function downloadFile(fileName) {
-    // Przygotowanie danych do wygenerowania tokenu
-            const data = {
-            fileName: fileName,
-            disk: "<?php echo htmlspecialchars($disk, ENT_QUOTES, 'UTF-8'); ?>",
-            path: "<?php echo htmlspecialchars($path, ENT_QUOTES, 'UTF-8'); ?>"
-        };
+  // Żądanie tokenu z backendu
+  fetch("api/cloud/generate_token.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.text()) // Tymczasowo odbierz jako tekst
+    .then((text) => {
+      console.log("Response from server:", text); // Zaloguj odpowiedź serwera
+      return JSON.parse(text); // Ręcznie zparsuj JSON
+    })
+    .then((result) => {
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      const downloadUrl = `api/cloud/download_file.php?token=${encodeURIComponent(
+        result.token
+      )}`;
 
-            // Żądanie tokenu z backendu
-            fetch('api/cloud/generate_token.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.text()) // Tymczasowo odbierz jako tekst
-        .then(text => {
-            console.log("Response from server:", text); // Zaloguj odpowiedź serwera
-            return JSON.parse(text); // Ręcznie zparsuj JSON
-        })
-        .then(result => {
-            if (result.error) {
-                throw new Error(result.error);
-            }
-            const downloadUrl = `api/cloud/download_file.php?token=${encodeURIComponent(result.token)}`;
-            
-            window.location.href = downloadUrl;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(error.message);
-        });
-
-        }
-
-
-
+      window.location.href = downloadUrl;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert(error.message);
+    });
+}
 
 // Funkcja "Otwórz"
 function openFile(fileName, fileType) {
-
-
-    if (fileType === 'folder') {
-        const newPath = currentPath ? `${currentPath}/${fileName}` : fileName;
-        window.location.href = `?disk=${disk}&path=${newPath}`;
-    }
+  if (fileType === "folder") {
+    const newPath = currentPath ? `${currentPath}/${fileName}` : fileName;
+    window.location.href = `?disk=${disk}&path=${newPath}`;
+  }
 }
-
 
 // Funkcja do usuwania pliku lub folderu
 function deleteFile(fileName) {
-    if (confirm('Czy na pewno chcesz usunąć: ' + fileName + '?')) {
-        const disk = "<?php echo $_GET['disk']; ?>";  // Pobieramy nazwę dysku z URL
-        const path = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>";  // Pobieramy ścieżkę z URL, domyślnie ""
+  if (confirm("Czy na pewno chcesz usunąć: " + fileName + "?")) {
+    const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
+    const path = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę z URL, domyślnie ""
 
-        // Wysyłanie zapytania AJAX do backendu
-        $.ajax({
-            url: 'api/cloud/delete_file.php',
-            method: 'POST',
-            data: {
-                file_name: fileName,
-                disk_name: disk,
-                path: path
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert(fileName + ' został usunięty. ' + response.query + ' disk='+  response.query_values.disk + ' dbPath='+response.query_values.dbPath + ' file_name='+response.query_values.file_name + ' path='+response.query_values.path);
-                    location.reload();  // Odśwież stronę po usunięciu
-                } else {
-                    alert('Wystąpił błąd podczas usuwania: ' + (response.error || 'Nieznany błąd'));
-                }
-            },
-            error: function() {
-                alert('Wystąpił błąd podczas komunikacji z serwerem.');
-            }
-        });
-    }
+    // Wysyłanie zapytania AJAX do backendu
+    $.ajax({
+      url: "api/cloud/delete_file.php",
+      method: "POST",
+      data: {
+        file_name: fileName,
+        disk_name: disk,
+        path: path,
+      },
+      success: function (response) {
+        if (response.success) {
+          alert(
+            fileName +
+              " został usunięty. " +
+              response.query +
+              " disk=" +
+              response.query_values.disk +
+              " dbPath=" +
+              response.query_values.dbPath +
+              " file_name=" +
+              response.query_values.file_name +
+              " path=" +
+              response.query_values.path
+          );
+          location.reload(); // Odśwież stronę po usunięciu
+        } else {
+          alert(
+            "Wystąpił błąd podczas usuwania: " +
+              (response.error || "Nieznany błąd")
+          );
+        }
+      },
+      error: function () {
+        alert("Wystąpił błąd podczas komunikacji z serwerem.");
+      },
+    });
+  }
 }
 
-
-
-
-const fileTable = document.getElementById('fileTable');
-const dropOverlay = document.getElementById('dropOverlay');
+const fileTable = document.getElementById("fileTable");
+const dropOverlay = document.getElementById("dropOverlay");
 
 // Pokaż nakładkę, gdy plik jest przeciągany nad obszarem tabeli
-fileTable.addEventListener('dragover', function(event) {
-    event.preventDefault();
-    dropOverlay.classList.remove('hidden');  // Pokazujemy nakładkę
+fileTable.addEventListener("dragover", function (event) {
+  event.preventDefault();
+  dropOverlay.classList.remove("hidden"); // Pokazujemy nakładkę
 });
 // Po upuszczeniu pliku, ukryj nakładkę i obsłuż przesyłanie pliku
-fileTable.addEventListener('drop', function(event) {
-    event.preventDefault();  // Zapobiegamy domyślnemu działaniu
-    dropOverlay.classList.add('hidden');  // Ukryj nakładkę po upuszczeniu pliku
+fileTable.addEventListener("drop", function (event) {
+  event.preventDefault(); // Zapobiegamy domyślnemu działaniu
+  dropOverlay.classList.add("hidden"); // Ukryj nakładkę po upuszczeniu pliku
 
-    const files = event.dataTransfer.files;  // Pobieramy pliki, które zostały upuszczone
+  const files = event.dataTransfer.files; // Pobieramy pliki, które zostały upuszczone
 
-    if (files.length > 0) {
-        const formData = new FormData();
-        formData.append('file_upload', files[0]);  // Zmieniamy na pierwszy plik z listy
+  if (files.length > 0) {
+    const formData = new FormData();
+    formData.append("file_upload", files[0]); // Zmieniamy na pierwszy plik z listy
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const path = urlParams.get('path') || '';  // Jeśli 'path' nie ma w URL, ustawiamy pusty ciąg
+    const urlParams = new URLSearchParams(window.location.search);
+    const path = urlParams.get("path") || ""; // Jeśli 'path' nie ma w URL, ustawiamy pusty ciąg
 
-        formData.append('disk', "<?php echo $_GET['disk']; ?>");  // Wysłanie dysku
-        formData.append('path', path);  // Wysłanie ścieżki
+    formData.append("disk", "<?php echo $_GET['disk']; ?>"); // Wysłanie dysku
+    formData.append("path", path); // Wysłanie ścieżki
 
-        // Wyświetlamy status przesyłania
-        document.getElementById('upload-status').innerText = "Uploading...";
+    // Wyświetlamy status przesyłania
+    document.getElementById("upload-status").innerText = "Uploading...";
 
-        // Wysyłamy plik do upload_file.php za pomocą AJAX
-        fetch('api/cloud/upload_file.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())  // Oczekujemy odpowiedzi w formacie JSON
-        .then(data => {
-            if (data.success) {
-                document.getElementById('upload-status').innerText = "Plik został przesłany pomyślnie.";
-            } else {
-                document.getElementById('upload-status').innerText = "Błąd przesyłania pliku: " + data.error;
-            }
-        })
-        .catch(error => {
-            console.error('Błąd:', error);
-            document.getElementById('upload-status').innerText = "Wystąpił błąd podczas przesyłania.";
-        });
-    }
+    // Wysyłamy plik do upload_file.php za pomocą AJAX
+    fetch("api/cloud/upload_file.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json()) // Oczekujemy odpowiedzi w formacie JSON
+      .then((data) => {
+        if (data.success) {
+          document.getElementById("upload-status").innerText =
+            "Plik został przesłany pomyślnie.";
+        } else {
+          document.getElementById("upload-status").innerText =
+            "Błąd przesyłania pliku: " + data.error;
+        }
+      })
+      .catch((error) => {
+        console.error("Błąd:", error);
+        document.getElementById("upload-status").innerText =
+          "Wystąpił błąd podczas przesyłania.";
+      });
+  }
 });
 
 // Ukryj nakładkę, gdy plik opuszcza obszar tabeli
-fileTable.addEventListener('dragleave', function(event) {
-    event.preventDefault();
-    dropOverlay.classList.add('hidden');
+fileTable.addEventListener("dragleave", function (event) {
+  event.preventDefault();
+  dropOverlay.classList.add("hidden");
 });
-
-    </script>
+</script>
 </body>
 </html>

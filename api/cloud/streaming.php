@@ -62,9 +62,9 @@ if ($realFilePath === false || strpos($realFilePath, $baseDir) !== 0 || !file_ex
 
 // Określenie typu pliku
 $fileExtension = strtolower(pathinfo($realFilePath, PATHINFO_EXTENSION));
-if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'bmp'])) {
-    // Obrazki
-    header('Content-Type: image/' . $fileExtension);
+if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'bmp', 'svg'])) {
+    // Obrazki i SVG
+    header('Content-Type: image/' . ($fileExtension === 'svg' ? 'svg+xml' : $fileExtension));
     readfile($realFilePath);
 } elseif ($fileExtension === 'mp4') {
     // Wideo
@@ -72,7 +72,7 @@ if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'bmp'])) {
     readfile($realFilePath);
 } elseif ($fileExtension === 'mp3') {
     // Audio
-    header('Content-Type: audio/mp3');
+    header('Content-Type: audio/mpeg');
     readfile($realFilePath);
 } else {
     // Typ pliku nieobsługiwany
@@ -80,6 +80,7 @@ if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'bmp'])) {
     echo json_encode(['error' => 'Unsupported file type.']);
     exit();
 }
+
 
 exit();
 ?>

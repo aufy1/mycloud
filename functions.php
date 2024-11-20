@@ -86,12 +86,13 @@ function hasAccessToDisk($database, $username, $disk) {
         }
 
 
-
+/*
         function checkFileExists($database, $disk, $fileName, $path) {
             // Przygotowanie zapytania SQL, które sprawdza, czy folder istnieje w danym path
             $query = "SELECT COUNT(*) FROM files WHERE file_name = ? AND disk = ? AND file_type = 'folder' AND path = ?";
             $stmt = $database->prepare($query);
-        
+            $count=0;
+
             if (!$stmt) {
                 echo "Błąd zapytania: " . mysqli_error($database);
                 exit();
@@ -122,7 +123,7 @@ function hasAccessToDisk($database, $username, $disk) {
             // Jeśli wynik jest większy niż 0, to folder istnieje
             return $count > 0;
         }
-
+*/
 
 
 
