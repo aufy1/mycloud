@@ -341,7 +341,7 @@ function play(fileName) {
         `;
       } else if (["mp3"].includes(fileExtension)) {
         mediaContainer.innerHTML = `
-          <audio id="mediaAudio" controls style="width: 300px; height: 20px;">
+          <audio id="mediaAudio" controls style="width: 300px; height: 40px;">
               <source src="${mediaUrl}" type="audio/mpeg">
           </audio>
         `;

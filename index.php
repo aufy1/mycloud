@@ -25,7 +25,7 @@ require_once 'functions.php';
 <body id="loginpage" class="text-center bg-gray-100">
 
 <main id="formSignin" class="max-w-md mx-auto mt-20 p-8 bg-white rounded-lg shadow-md">
-  <form action="weryfikuj.php" method="post">
+  <form action="verify.php" method="post">
     <h1 class="text-2xl font-semibold text-gray-700 mb-4">Please sign in</h1>
 
     <input type="hidden" name="screen_resolution" id="screen_resolution">
@@ -59,7 +59,7 @@ require_once 'functions.php';
 </main>
 
 <main id="formRegister" class="form-signin max-w-md mx-auto mt-20 p-8 bg-white rounded-lg shadow-md" style="display: none">
-  <form action="rejestracja.php" method="post">
+  <form action="register.php" method="post">
     <h1 class="text-2xl font-semibold text-gray-700 mb-4">Please register</h1>
 
     <div class="mb-4">
