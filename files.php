@@ -140,7 +140,7 @@ require_once 'head.php';
         <form action="api/cloud/create_dir.php" method="POST">
             <div class="flex items-center">
                 <input type="text" name="new_folder" id="new_folder" placeholder="Nowy folder" class="w-full p-2 border border-gray-300 rounded-l-md" required>
-                <button type="submit" class="bg-blue-500 text-white p-2  rounded-r-md">Utwórz</button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white p-2  rounded-r-md">Utwórz</button>
             </div>
 
             <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
