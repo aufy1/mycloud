@@ -16,8 +16,6 @@ if (empty($disk)) {
     exit();
 }
 
-
-
 // Połączenie z bazą danych
 require_once 'config.php';
 require_once 'functions.php';
@@ -74,8 +72,18 @@ if (!$result) {
 // Tablica na przechowanie wyników
 $files = [];
 while ($row = $result->fetch_assoc()) {
+    if($path){
+    $fullFilePath = 'uploads/cloud/'. $row['path'] . '/' . $row['file_name'];}
+    else{
+    $fullFilePath = 'uploads/cloud/' . $row['path'] . $row['file_name'];
+    }
+
+    // Dodajemy pełną ścieżkę do tablicy wyników
+    $row['full_file_path'] = $fullFilePath;
+
     $files[] = $row;
 }
+
 
 
 require_once 'head.php';
@@ -88,15 +96,12 @@ require_once 'head.php';
 
     <div id="mediaContainer" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50" style="display: none;">
     <div class="relative bg-white p-4 rounded-lg max-w-full max-h-full overflow-auto">
-        <!-- Przycisk X w formie lokalnego pliku SVG, umieszczony poza obrazem -->
         <button id="closeButton" class="absolute top-0 right-0 text-white bg-transparent border-0 p-2 focus:outline-none z-50">
-            <!-- Ikona SVG X z lokalnego pliku -->
             <img src="media/storage_icons/x-solid.svg" alt="Close" class="w-4 h-4">
         </button>
 
-        <!-- Miejsce na media (obrazek lub film) -->
         <div id="mediaContent" class="flex justify-center p-3 items-center">
-            <!-- Treść media (obrazek lub film) pojawi się tutaj -->
+            <!-- media content -->
         </div>
     </div>
 </div>
@@ -106,15 +111,11 @@ require_once 'head.php';
         <section class="sekcja1">
             <div class="container mx-auto">
                 <div class="w-full shadow-md sm:rounded-lg text-gray-500 bg-gray-50 flex items-center justify-between mb-2 text-gray-700 uppercase bg-gray-50 p-2">
-                    <span class="text-md text-gray-900">Dysk: <?php echo htmlspecialchars($disk); ?></span>
-                    <!-- Wyświetlanie aktualnej ścieżki -->
+                    <span class="text-md text-gray-900 ml-2">Dysk: <?php echo htmlspecialchars($disk); ?></span>
                     <div class="flex items-center">
                         <button id="backButton" class="flex items-center text-white p-2 bg-blue-100 hover:bg-blue-200 rounded-3xl">
                             <img src="media/storage_icons/chevron-left-solid.svg" alt="Back" class="w-5 h-5">
                         </button>
-
-
-                        <!-- Przycisk do zmiany ścieżki -->
                         <input type="text" id="goToPath" placeholder="Path" class="ml-4 mr-4 p-2 min-w-80 rounded" value="<?php echo htmlspecialchars($path); ?>" />
                         <button id="submitPath" class="p-2 text-white bg-blue-100 hover:bg-blue-200 rounded-3xl">
                             <img src="media/storage_icons/arrow-right-solid.svg" alt="Go" class="w-5 h-5">
@@ -130,9 +131,7 @@ require_once 'head.php';
 
                 <div id="newFolderForm" class="hidden fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
     <div class="relative bg-white p-8 rounded-lg max-w-sm w-full">
-        <!-- Przycisk X w formie SVG, umieszczony poza formularzem -->
         <button id="closeFormButton" class="absolute top-0 right-0 text-white bg-transparent border-0 p-2 focus:outline-none z-50">
-            <!-- Ikona SVG dla X -->
             <img src="media/storage_icons/x-solid.svg" alt="Close" class="w-4 h-4">
         </button>
 
@@ -143,8 +142,8 @@ require_once 'head.php';
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white p-2  rounded-r-md">Utwórz</button>
             </div>
 
-            <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>"> <!-- Ukryty input dla dysku -->
-            <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>"> <!-- Ukryty input dla ścieżki -->
+            <input type="hidden" name="disk" value="<?php echo htmlspecialchars($disk); ?>">
+            <input type="hidden" name="path" value="<?php echo htmlspecialchars($path); ?>">
         </form>
     </div>
 </div>
@@ -165,6 +164,7 @@ require_once 'head.php';
                             <th scope="col" class="px-6 py-3">Owner</th>
                             <th scope="col" class="px-6 py-3">Last Modified</th>
                             <th scope="col" class="px-6 py-3">File Type</th>
+                            <th scope="col" class="px-6 py-3">Size</th>
                             <th scope="col" class="py-3">Action</th>
                         </tr>
                     </thead>
@@ -192,24 +192,39 @@ require_once 'head.php';
         <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['owner']); ?></td>
         <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['last_modified']); ?></td>
         <td class="px-6 py-4 text-center"><?php echo htmlspecialchars($file['file_type']); ?></td>
+        <td class="text-center">
+        <?php
+        if(!($file['file_type']=="folder"))
+        {
+          $filePath = $file['full_file_path'];
+          if (file_exists($filePath)) {
+              $fileSize = filesize($filePath);  // getting filesize
+              echo formatSize($fileSize); 
+          } else {
+              echo "Brak pliku";
+          }
+        }
+        else
+        {
+          echo "-";
+        }
+        ?>
+    </td>
         <td class="py-4 text-center">
         <div class="w-32 mt-0 mb-0 ml-auto mr-auto">
     <div class="flex justify-end gap-4">
-        <!-- Open button visible only for folders -->
         <?php if ($fileType == 'folder'): ?>
             <a href="#" onclick="openFile('<?php echo htmlspecialchars($file['file_name']); ?>', '<?php echo htmlspecialchars($file['file_type']); ?>')">
                 <img src="<?php echo htmlspecialchars($actionIcons['folder-open']); ?>" alt="Open" class="w-5 h-5" title="Open">
             </a>
         <?php endif; ?>
 
-        <!-- Play button visible only for jpg, bmp, mp4, png, mp3 -->
         <?php if (in_array($fileType, ['jpg', 'bmp', 'mp4', 'png', 'svg', 'mp3'])): ?>
             <a href="#" onclick="play('<?php echo htmlspecialchars($file['file_name']); ?>')">
                 <img src="<?php echo htmlspecialchars($actionIcons['play']); ?>" alt="Play" class="w-5 h-5" title="Play">
             </a>
         <?php endif; ?>
 
-        <!-- Download and Share buttons visible only for non-folder files -->
         <?php if ($fileType != 'folder'): ?>
             <a href="#" onclick="downloadFile('<?php echo htmlspecialchars($file['file_name']); ?>')">
                 <img src="<?php echo htmlspecialchars($actionIcons['download']); ?>" alt="Download" class="w-5 h-5" title="Download">
@@ -233,8 +248,6 @@ require_once 'head.php';
                     </tbody>
                 </table>
 
-
-                            <!-- Nakładka dla przeciągania pliku -->
     <div id="dropOverlay" class="pointer-events-none absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center text-white text-2xl hidden">
         Upuść tutaj
     </div>
@@ -251,9 +264,9 @@ require_once 'head.php';
     <?php require_once 'footer.php'; ?>
 
 <script>
-const disk = "<?php echo $_GET['disk']; ?>"; // Pobieramy nazwę dysku z URL
-const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>"; // Pobieramy ścieżkę, domyślnie ""
-const username = "<?php echo $_SESSION['username']; ?>"; // Nazwa użytkownika
+const disk = "<?php echo $_GET['disk']; ?>";
+const currentPath = "<?php echo isset($_GET['path']) ? $_GET['path'] : ''; ?>";
+const username = "<?php echo $_SESSION['username']; ?>";
 
 document
   .getElementById("newFolderButton")
@@ -277,7 +290,6 @@ document
     document.getElementById("newFolderForm").style.display = "none";
   });
 
-// Funkcja do otwierania formularza (np. przy kliknięciu przycisku)
 function openNewFolderForm() {
   document.getElementById("newFolderForm").style.display = "flex";
 }
@@ -285,7 +297,7 @@ function openNewFolderForm() {
 document.getElementById("submitPath").addEventListener("click", function () {
   const newPath = document.getElementById("goToPath").value.trim(); // Pobieramy nową ścieżkę z pola tekstowego
   if (newPath) {
-    window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`; // Przekierowanie na nową ścieżkę
+    window.location.href = `?disk=<?php echo htmlspecialchars($disk); ?>&path=${newPath}`;
   } else {
     alert("Wprowadź ścieżkę.");
   }
@@ -362,33 +374,30 @@ document.getElementById("closeButton").addEventListener("click", function () {
   const mediaModal = document.getElementById("mediaContainer");
   mediaModal.style.display = "none";
 
-  // Zatrzymanie odtwarzania wideo
-  const videoElement = document.getElementById("mediaVideo");
+
+  const videoElement = document.getElementById("mediaVideo");  // Stop video
   if (videoElement) {
     videoElement.pause();
-    videoElement.src = ""; // Zwolnienie źródła
+    videoElement.src = ""; // Exit source
   }
 
-  // Zatrzymanie odtwarzania audio
-  const audioElement = document.getElementById("mediaAudio");
+  const audioElement = document.getElementById("mediaAudio"); // Stop audio
   if (audioElement) {
     audioElement.pause();
-    audioElement.src = ""; // Zwolnienie źródła
+    audioElement.src = "";
   }
 
-  // Usunięcie zawartości kontenera mediów
   const mediaContainer = document.getElementById("mediaContent");
   mediaContainer.innerHTML = "";
 });
 
 
-// Funkcja "Udostępnij"
+// Share
 function shareFile(fileName) {
   let sharedWith = prompt(
     "Wprowadź nazwę użytkownika, z którym chcesz udostępnić plik:"
   );
   if (sharedWith) {
-    // Wysłanie zapytania AJAX do backendu w celu udostępnienia pliku
     $.ajax({
       url: "api/cloud/share_file.php",
       method: "POST",
@@ -476,20 +485,7 @@ function deleteFile(fileName) {
       },
       success: function (response) {
         if (response.success) {
-          alert(
-            fileName +
-              " został usunięty. " +
-              response.query +
-              " disk=" +
-              response.query_values.disk +
-              " dbPath=" +
-              response.query_values.dbPath +
-              " file_name=" +
-              response.query_values.file_name +
-              " path=" +
-              response.query_values.path
-          );
-          location.reload(); // Odśwież stronę po usunięciu
+          location.reload();
         } else {
           alert(
             "Wystąpił błąd podczas usuwania: " +
@@ -507,37 +503,53 @@ function deleteFile(fileName) {
 const fileTable = document.getElementById("fileTable");
 const dropOverlay = document.getElementById("dropOverlay");
 
+let dragCounter = 0; // Licznik aktywnych zdarzeń dragenter/dragleave
+
 // Pokaż nakładkę, gdy plik jest przeciągany nad obszarem tabeli
-fileTable.addEventListener("dragover", function (event) {
+fileTable.addEventListener("dragenter", function (event) {
   event.preventDefault();
+  dragCounter++; // Zwiększamy licznik
   dropOverlay.classList.remove("hidden"); // Pokazujemy nakładkę
 });
-// Po upuszczeniu pliku, ukryj nakładkę i obsłuż przesyłanie pliku
-fileTable.addEventListener("drop", function (event) {
-  event.preventDefault(); // Zapobiegamy domyślnemu działaniu
-  dropOverlay.classList.add("hidden"); // Ukryj nakładkę po upuszczeniu pliku
 
-  const files = event.dataTransfer.files; // Pobieramy pliki, które zostały upuszczone
+fileTable.addEventListener("dragleave", function (event) {
+  event.preventDefault();
+  dragCounter--; // Zmniejszamy licznik
+
+  // Ukryj nakładkę tylko, gdy licznik wynosi 0
+  if (dragCounter === 0) {
+    dropOverlay.classList.add("hidden");
+  }
+});
+
+fileTable.addEventListener("dragover", function (event) {
+  event.preventDefault(); // Pozwala na upuszczenie pliku
+});
+
+fileTable.addEventListener("drop", function (event) {
+  event.preventDefault();
+  dragCounter = 0; // Reset licznika po upuszczeniu pliku
+  dropOverlay.classList.add("hidden"); // Ukryj nakładkę po upuszczeniu
+
+  const files = event.dataTransfer.files;
 
   if (files.length > 0) {
     const formData = new FormData();
-    formData.append("file_upload", files[0]); // Zmieniamy na pierwszy plik z listy
+    formData.append("file_upload", files[0]);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const path = urlParams.get("path") || ""; // Jeśli 'path' nie ma w URL, ustawiamy pusty ciąg
+    const path = urlParams.get("path") || "";
 
-    formData.append("disk", "<?php echo $_GET['disk']; ?>"); // Wysłanie dysku
-    formData.append("path", path); // Wysłanie ścieżki
+    formData.append("disk", "<?php echo $_GET['disk']; ?>");
+    formData.append("path", path);
 
-    // Wyświetlamy status przesyłania
     document.getElementById("upload-status").innerText = "Uploading...";
 
-    // Wysyłamy plik do upload_file.php za pomocą AJAX
     fetch("api/cloud/upload_file.php", {
       method: "POST",
       body: formData,
     })
-      .then((response) => response.json()) // Oczekujemy odpowiedzi w formacie JSON
+      .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           document.getElementById("upload-status").innerText =
@@ -555,11 +567,6 @@ fileTable.addEventListener("drop", function (event) {
   }
 });
 
-// Ukryj nakładkę, gdy plik opuszcza obszar tabeli
-fileTable.addEventListener("dragleave", function (event) {
-  event.preventDefault();
-  dropOverlay.classList.add("hidden");
-});
 </script>
 </body>
 </html>

@@ -1,6 +1,5 @@
-  {
-    "file_icons":
-    {
+{
+  "file_icons": {
     "png": "media/storage_icons/image-regular.svg",
     "jpg": "media/storage_icons/image-regular.svg",
     "svg": "media/storage_icons/image-regular.svg",
@@ -11,17 +10,16 @@
     "docx": "media/storage_icons/file-word-regular.svg",
     "folder": "media/storage_icons/folder-regular.svg",
     "xlsx": "media/storage_icons/file-excel-regular.svg",
-    "zip": "media/storage_icons/file-zipper.svg",
-    "rar": "media/storage_icons/file-zipper.svg",
-    "gzip": "media/storage_icons/file-zipper.svg",
+    "zip": "media/storage_icons/file-zipper-solid.svg",
+    "rar": "media/storage_icons/file-zipper-solid.svg",
+    "gzip": "media/storage_icons/file-zipper-solid.svg",
     "default": "media/storage_icons/file-regular.svg"
-    },
-    "action_icons":
-    {
-      "download": "media/storage_icons/circle-down-regular.svg",
-      "folder-open": "media/storage_icons/folder-open-regular.svg",
-      "play": "media/storage_icons/play-solid.svg",
-      "share": "media/storage_icons/share-solid.svg",
-      "delete": "media/storage_icons/trash-solid.svg"
-    }
+  },
+  "action_icons": {
+    "download": "media/storage_icons/circle-down-regular.svg",
+    "folder-open": "media/storage_icons/folder-open-regular.svg",
+    "play": "media/storage_icons/play-solid.svg",
+    "share": "media/storage_icons/share-solid.svg",
+    "delete": "media/storage_icons/trash-solid.svg"
   }
+}
