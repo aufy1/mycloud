@@ -14,7 +14,6 @@ require_once 'config.php';
 <?php require_once 'header.php'; ?>	
 
 <main class="py-10">
-<section class="sekcja1">	
     <div class="container mx-auto">
             <h2 class="text-center text-2xl mb-5">Edytuj profil</h2>
             
@@ -74,7 +73,6 @@ require_once 'config.php';
                 </div>
             </form>
     </div>
-</section>	
 </main>
 
 <?php require_once 'footer.php'; ?>			  	

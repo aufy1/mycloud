@@ -95,7 +95,7 @@ require_once 'head.php';
     <?php require_once 'header.php'; ?>
 
     <div id="mediaContainer" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50" style="display: none;">
-    <div class="relative bg-white p-4 rounded-lg max-w-full max-h-full overflow-auto">
+    <div class="relative bg-white p-4 rounded-lg max-w-md max-h-md overflow-auto">
         <button id="closeButton" class="absolute top-0 right-0 text-white bg-transparent border-0 p-2 focus:outline-none z-50">
             <img src="media/storage_icons/x-solid.svg" alt="Close" class="w-4 h-4">
         </button>
