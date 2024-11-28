@@ -13,7 +13,8 @@ require_once '../../config.php';
 
 $user = $_SESSION['username'];
 $recipient = trim($_POST['recipient']);
-$message = trim($_POST['message']);
+$message = isset($_POST['message']) ? trim($_POST['message']) : '';
+
 
 if (!preg_match('/^[a-zA-Z0-9_ -]+$/', $recipient)) {
     echo json_encode(['success' => false, 'message' => 'Nieprawidłowy odbiorca.']);

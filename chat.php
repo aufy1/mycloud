@@ -175,49 +175,53 @@ $(document).ready(function() {
     fetchMessages();
 
     $('#messageForm').on('submit', function(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        let formData = new FormData(this); // Użycie FormData do obsługi plików
-        $.ajax({
-            type: 'POST',
-            url: 'api/chat/send_message.php',
-            data: formData,
-            contentType: false, // Wyłącza domyślne kodowanie nagłówka
-            processData: false, // Zapobiega przetwarzaniu danych jako tekst
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    if (response.image) {
-                        // Wyświetlenie wiadomości z obrazem
-                        $('.messages').append(
-                            `<div class="message outgoing bg-indigo-100 p-3 rounded-lg max-w-xs self-end">
-                                <strong class="text-sm text-gray-700">${response.user}:</strong>
-                                <p class="text-sm mt-2"><img src="${response.image}" alt="Przesłane zdjęcie" class="w-48 rounded-lg"></p>
-                                <small class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}</small>
-                            </div>`
-                        );
-                    } else {
-                        // Wyświetlenie wiadomości tekstowej
-                        $('.messages').append(
-                            `<div class="message outgoing bg-indigo-100 p-3 rounded-lg max-w-xs self-end">
-                                <strong class="text-sm text-gray-700">${response.user}:</strong>
-                                <p class="text-sm mt-2">${response.message}</p>
-                                <small class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}</small>
-                            </div>`
-                        );
-                    }
-                    $('input[name="message"]').val('');
-                    $('input[name="image"]').val('');
-                    fetchMessages();  // Odswieżenie wiadomości
+    let formData = new FormData(this); // Użycie FormData do obsługi plików
+    $.ajax({
+        type: 'POST',
+        url: 'api/chat/send_message.php',
+        data: formData,
+        contentType: false, // Wyłącza domyślne kodowanie nagłówka
+        processData: false, // Zapobiega przetwarzaniu danych jako tekst
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                if (response.image) {
+                    // Wyświetlenie wiadomości z obrazem
+                    $('.messages').append(
+                        `<div class="message outgoing bg-indigo-100 p-3 rounded-lg max-w-xs self-end">
+                            <strong class="text-sm text-gray-700">${response.user}:</strong>
+                            <p class="text-sm mt-2"><img src="${response.image}" alt="Przesłane zdjęcie" class="w-48 rounded-lg"></p>
+                            <small class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}</small>
+                        </div>`
+                    );
                 } else {
-                    alert(response.message);
+                    // Wyświetlenie wiadomości tekstowej
+                    $('.messages').append(
+                        `<div class="message outgoing bg-indigo-100 p-3 rounded-lg max-w-xs self-end">
+                            <strong class="text-sm text-gray-700">${response.user}:</strong>
+                            <p class="text-sm mt-2">${response.message}</p>
+                            <small class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}</small>
+                        </div>`
+                    );
                 }
-            },
-            error: function() {
-                alert('Wystąpił błąd przy wysyłaniu wiadomości.');
+
+                // Zresetowanie pola tekstowego i odblokowanie go
+                $('input[name="message"]').val('');
+                $('input[name="image"]').val('');
+                $('#messageInput').prop('disabled', false); // Odblokowanie pola tekstowego
+                fetchMessages();  // Odswieżenie wiadomości
+            } else {
+                alert(response.message);
             }
-        });
+        },
+        error: function() {
+            alert('Wystąpił błąd przy wysyłaniu wiadomości.');
+        }
     });
+});
+
 });
 </script>
 
